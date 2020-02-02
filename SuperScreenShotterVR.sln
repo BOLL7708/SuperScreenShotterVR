@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.329
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperScreenShotterVR", "SuperScreenShotterVR\SuperScreenShotterVR.csproj", "{7CC87223-783B-405A-9302-7B33A466055C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7CC87223-783B-405A-9302-7B33A466055C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CC87223-783B-405A-9302-7B33A466055C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CC87223-783B-405A-9302-7B33A466055C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CC87223-783B-405A-9302-7B33A466055C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3A355DB0-9DD8-4290-A447-3869B77B7A61}
+	EndGlobalSection
+EndGlobal
