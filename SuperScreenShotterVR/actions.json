@@ -1,0 +1,33 @@
+{
+	"default_bindings": [
+		{
+			"controller_type": "knuckles",
+			"binding_url": "bindings_knuckles.json"
+		}
+	],
+	"actions": [
+		{
+			"name": "/actions/default/in/enable_chord",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/default/in/take_screenshot",
+			"requirement": "optional",
+			"type": "boolean"
+		}
+	],
+	"action_sets": [
+		{
+			"name": "/actions/default",
+			"usage": "leftright"
+		}
+	],
+	"localization" : [
+		{
+			"language_tag": "en_US",
+			"/actions/default/in/enable_chord": "Enable Chord (dummy)",
+			"/actions/default/in/teleport": "Take Screenshot"
+		}
+	]
+}

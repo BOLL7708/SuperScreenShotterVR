@@ -1,0 +1,16 @@
+{
+	"applications": [{
+		"app_key": "boll7708.superscreenshottervr",
+		"launch_type": "binary",
+		"binary_path_windows": "SuperScreenShotterVR.exe",
+		"is_dashboard_overlay": false,
+		"action_manifest_path": "./actions.json",
+
+		"strings": {
+			"en_us": {
+				"name": "SuperScreenShotterVR",
+				"description": "Take super high resolution screenshots."
+			}
+		}
+	}]
+}
