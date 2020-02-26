@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using BOLL7708;
 using Valve;
+using Valve.VR;
 
 namespace SuperScreenShotterVR
 {
@@ -24,8 +25,11 @@ namespace SuperScreenShotterVR
     /// </summary>
     public partial class MainWindow : Window
     {
-        private EasyOpenVRSingleton ovr = EasyOpenVRSingleton.Instance;
-        private bool initComplete = false;
+        private EasyOpenVRSingleton _ovr = EasyOpenVRSingleton.Instance;
+        private bool _initComplete = false;
+        private bool _isHookedForScreenshots = false;
+        private string _currentAppId = "";
+        private ulong _overlayHandle = 0;
         public MainWindow()
         {
             InitializeComponent();
@@ -39,26 +43,56 @@ namespace SuperScreenShotterVR
             while(true)
             {
                 Thread.Sleep(10); // 100 Hz
-                if(!ovr.IsInitialized())
+                if(!_ovr.IsInitialized())
                 {
-                    ovr.Init();
+                    _ovr.SetDebugLogAction((message) => {
+                        Debug.WriteLine(message);
+                    });
+                    _ovr.Init();
                     Thread.Sleep(1000);
                 } else
                 {
-                    if(!initComplete)
+                    if(!_initComplete)
                     {
-                        ovr.LoadAppManifest("./app.vrmanifest");
-                        ovr.LoadActionManifest("./actions.json");
-                        ovr.RegisterActionSet("/actions/default");
-                        ovr.RegisterDigitalAction(
+                        _ovr.SetScreenshotOutputFolder("E:\\Temp\\ScreenshotTest");
+                        _isHookedForScreenshots = _ovr.HookScreenshots();
+                        _ovr.LoadAppManifest("./app.vrmanifest");
+                        _ovr.LoadActionManifest("./actions.json");
+                        _ovr.RegisterActionSet("/actions/default");
+                        _ovr.RegisterDigitalAction(
                             "/actions/default/in/take_screenshot", 
-                            (state) => { if(state) TakeScreenshot(); }
+                            (data, handle) => { if(data.bState) TakeScreenshot(); }
                         );
-                        initComplete = true;
+                        _overlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
+                        _currentAppId = _ovr.GetRunningApplicationId();
+                        _initComplete = true;
                         Debug.WriteLine("Init complete.");
                     } else
                     {
-                        ovr.UpdateActionStates();
+                        _ovr.UpdateActionStates();
+                        var events = _ovr.GetNewEvents();
+                        foreach(var e in events)
+                        {
+                            switch((EVREventType) e.eventType) {
+                                case EVREventType.VREvent_RequestScreenshot:
+                                    Debug.WriteLine("Screenshot requested");
+                                    break;
+                                case EVREventType.VREvent_ScreenshotTriggered:
+                                    Debug.WriteLine("Screenshot triggered");
+                                    if(_isHookedForScreenshots ) _ovr.TakeScreenshot(_currentAppId);
+                                    break;
+                                case EVREventType.VREvent_ScreenshotTaken:
+                                    Debug.WriteLine("Screenshot taken, use this for notifications!");
+                                    _ovr.EnqueueNotification(_overlayHandle, "Screenshot taken!");
+                                    break;
+                                case EVREventType.VREvent_ScreenshotFailed:
+                                    Debug.WriteLine("Screenshot failed");
+                                    break;
+                                case EVREventType.VREvent_SceneApplicationChanged:
+                                    _currentAppId = _ovr.GetRunningApplicationId();
+                                    break;
+                            }
+                        }
                     }
                 }
             }
@@ -69,11 +103,13 @@ namespace SuperScreenShotterVR
         private void TakeScreenshot()
         {
             Debug.WriteLine("Taking screenshot!");
-            originalScale = ovr.GetRenderTargetForCurrentApp();
-            ovr.SetRenderScaleForCurrentApp(5f); // Clamped to 500%
+            originalScale = _ovr.GetRenderTargetForCurrentApp();
+            _ovr.SetRenderScaleForCurrentApp(5f); // Clamped to 500%
             Thread.Sleep(100); // Needs at least 50ms to change render scale before taking screenshot
-            ovr.TakeScreenshot();
-            ovr.SetRenderScaleForCurrentApp(originalScale);
+            var id = _ovr.GetRunningApplicationId();
+            if (id != string.Empty) id = id.Split('.').Last();
+            _ovr.TakeScreenshot(id);
+            _ovr.SetRenderScaleForCurrentApp(originalScale);
             Debug.WriteLine($"Screenshot taken! Original scale: {originalScale}");
         }
     }
