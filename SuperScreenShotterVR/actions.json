@@ -7,27 +7,21 @@
 	],
 	"actions": [
 		{
-			"name": "/actions/default/in/enable_chord",
-			"requirement": "optional",
-			"type": "boolean"
-		},
-		{
-			"name": "/actions/default/in/take_screenshot",
+			"name": "/actions/screenshots/in/take_screenshot",
 			"requirement": "optional",
 			"type": "boolean"
 		}
 	],
 	"action_sets": [
 		{
-			"name": "/actions/default",
+			"name": "/actions/screenshots",
 			"usage": "leftright"
 		}
 	],
 	"localization" : [
 		{
 			"language_tag": "en_US",
-			"/actions/default/in/enable_chord": "Enable Chord (dummy)",
-			"/actions/default/in/teleport": "Take Screenshot"
+			"/actions/screenshots/in/take_screenshot": "Take Screenshot"
 		}
 	]
 }
