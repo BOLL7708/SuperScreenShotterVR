@@ -15,6 +15,7 @@ namespace SuperScreenShotterVR
 {
     public class MainController
     {
+        private Properties.Settings _settings = Properties.Settings.Default;
         private EasyOpenVRSingleton _ovr = EasyOpenVRSingleton.Instance;
         private bool _initComplete = false;
         private bool _isHookedForScreenshots = false;
