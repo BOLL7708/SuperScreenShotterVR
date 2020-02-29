@@ -50,54 +50,52 @@ namespace SuperScreenShotterVR
                 {
                     if (!_initComplete)
                     {
+                        // Screenshots
                         _ovr.SetScreenshotOutputFolder(_currentOutputPath);
                         _isHookedForScreenshots = _ovr.HookScreenshots();
+                        
+                        // Input
                         _ovr.LoadAppManifest("./app.vrmanifest");
                         _ovr.LoadActionManifest("./actions.json");
                         _ovr.RegisterActionSet("/actions/screenshots");
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/take_screenshot",
-                            (data, handle) => { if (data.bState) TakeScreenshot(); }
+                            (data, handle) => { if (data.bState) ScreenshotTriggered(); }
                         );
                         _overlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
                         _currentAppId = _ovr.GetRunningApplicationId();
+
+                        // Events
+                        _ovr.RegisterEvent(EVREventType.VREvent_RequestScreenshot, (data) => { 
+                            Debug.WriteLine("Screenshot requested");
+                        });
+                        _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTriggered, (data) => {
+                            Debug.WriteLine("Screenshot triggered");
+                            if (_isHookedForScreenshots && !_isTakingScreenshot) ScreenshotTriggered();
+                        });
+                        _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTaken, (data) => {
+                            Debug.WriteLine("Screenshot taken");
+                            ScreenShotTaken();
+                        });
+                        _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotFailed, (data) => {
+                            Debug.WriteLine("Screenshot failed");
+                            _isTakingScreenshot = false;
+                        });
+                        _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotProgressToDashboard, (data) => {
+                            Debug.WriteLine("Screenshot progress to dashboard");
+                        });
+                        _ovr.RegisterEvent(EVREventType.VREvent_SceneApplicationChanged, (data) => {
+                            _currentAppId = _ovr.GetRunningApplicationId();
+                            Debug.WriteLine("Screenshot requested");
+                        });
+
                         _initComplete = true;
                         Debug.WriteLine("Init complete.");
                     }
                     else
                     {
                         _ovr.UpdateActionStates();
-                        var events = _ovr.GetNewEvents();
-                        foreach (var e in events)
-                        {
-                            switch ((EVREventType)e.eventType)
-                            {
-                                case EVREventType.VREvent_RequestScreenshot:
-                                    Debug.WriteLine("Screenshot requested");
-                                    break;
-                                case EVREventType.VREvent_ScreenshotTriggered:
-                                    Debug.WriteLine("Screenshot triggered");
-                                    if (_isHookedForScreenshots && !_isTakingScreenshot) ScreenshotTriggered();
-                                    break;
-                                case EVREventType.VREvent_ScreenshotTaken:
-                                    Debug.WriteLine("Screenshot taken");
-                                    ScreenShotTaken();
-                                    break;
-                                case EVREventType.VREvent_ScreenshotFailed:
-                                    Debug.WriteLine("Screenshot failed");
-                                    _isTakingScreenshot = false;
-                                    break;
-                                case EVREventType.VREvent_ScreenshotProgressToDashboard:
-                                    Debug.WriteLine("Screenshot progress to dashboard");
-                                    break;
-                                case EVREventType.VREvent_SceneApplicationChanged:
-                                    _currentAppId = _ovr.GetRunningApplicationId();
-                                    // if (_currentAppId != string.Empty) _currentOutputPath = $"{OUTPUT_PATH}\\{_currentAppId.Split('.').Last()}";
-                                    // Debug.WriteLine($"Current output path: {_currentOutputPath}");
-                                    // _ovr.SetScreenshotOutputFolder(_currentOutputPath);
-                                    break;
-                            }
-                        }
+                        _ovr.UpdateEvents();
                     }
                 }
             }
@@ -151,7 +149,13 @@ namespace SuperScreenShotterVR
                     var image = System.Drawing.Image.FromFile(filePath);
                     var bitmap = new Bitmap(image);
                     notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap);
+                } else
+                {
+                    Debug.WriteLine($"Could not find screenshot after taking it: {filePath}");
                 }
+            } else
+            {
+                Debug.WriteLine("Screenshot result was null.");
             }
             _ovr.EnqueueNotification(_overlayHandle, "Screenshot taken!", notificationBitmap);
             _isTakingScreenshot = false;

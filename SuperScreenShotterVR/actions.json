@@ -21,6 +21,7 @@
 	"localization" : [
 		{
 			"language_tag": "en_US",
+			"/actions/screenshots": "Screeenshots",
 			"/actions/screenshots/in/take_screenshot": "Take Screenshot"
 		}
 	]
