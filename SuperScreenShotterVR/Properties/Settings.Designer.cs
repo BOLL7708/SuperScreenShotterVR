@@ -202,5 +202,17 @@ namespace SuperScreenShotterVR.Properties {
                 this["DelayCapture"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SubmitToSteam {
+            get {
+                return ((bool)(this["SubmitToSteam"]));
+            }
+            set {
+                this["SubmitToSteam"] = value;
+            }
+        }
     }
 }

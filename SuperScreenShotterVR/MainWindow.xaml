@@ -24,6 +24,7 @@
         </GroupBox>
         <GroupBox Header="Output" DockPanel.Dock="Top">
             <StackPanel Orientation="Vertical">
+                <CheckBox x:Name="CheckBox_SubmitToSteam" Content="Submit screenshots to Steam" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
                 <CheckBox x:Name="CheckBox_FilenamePrefix"  Content="Prefix filename with app ID" Checked="CheckBox_FilenamePrefix_Checked" Unchecked="CheckBox_FilenamePrefix_Checked"/>
                 <CheckBox x:Name="CheckBox_Subfolder" Content="Save in subfolder based on app ID" Checked="CheckBox_Subfolder_Checked" Unchecked="CheckBox_Subfolder_Checked"/>
                 <StackPanel Orientation="Horizontal">
