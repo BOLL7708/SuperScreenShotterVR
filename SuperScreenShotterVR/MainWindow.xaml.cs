@@ -110,6 +110,7 @@ namespace SuperScreenShotterVR
         private void Button_BrowseDirectory_Click(object sender, RoutedEventArgs e)
         {
             // TODO: Should update the folder in the controller.
+            _controller.UpdateOutputFolder();
         }
 
         private void CheckBox_Notifications_Checked(object sender, RoutedEventArgs e)
@@ -142,9 +143,9 @@ namespace SuperScreenShotterVR
             _settings.Save();
             if (value)
             {
-                _controller.HookScreenshots();
+                _controller.UpdateScreenshotHook();
             } else {
-                var result = MessageBox.Show("You need to restart this application to restore original screenshot functionality.", "SuperScreenShotterVR", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
+                var result = MessageBox.Show("You need to restart this application to restore original screenshot functionality, do it now?", "SuperScreenShotterVR", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
                 if(result == MessageBoxResult.Yes)
                 {
                     Application.Current.Shutdown();

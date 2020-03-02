@@ -52,9 +52,8 @@ namespace SuperScreenShotterVR
                     if (!_initComplete)
                     {
                         // Screenshots
-                        SetOutputFolder(_settings.Directory);
-                        if(_settings.ReplaceShortcut) _isHookedForScreenshots = _ovr.HookScreenshots();
-                        
+                        UpdateScreenshotHook();
+
                         // Input
                         _ovr.LoadAppManifest("./app.vrmanifest");
                         _ovr.LoadActionManifest("./actions.json");
@@ -95,7 +94,8 @@ namespace SuperScreenShotterVR
                             _currentAppId = _ovr.GetRunningApplicationId();
 
                             // At some occations we seem to lose the hook, so we redo it, seems fine.
-                            if (_settings.ReplaceShortcut) _isHookedForScreenshots = _ovr.HookScreenshots();
+                            UpdateScreenshotHook();
+                            UpdateOutputFolder();
 
                             Debug.WriteLine("New application running");
                         });
@@ -119,17 +119,31 @@ namespace SuperScreenShotterVR
             }
         }
 
-        internal void HookScreenshots()
+        public void UpdateScreenshotHook()
         {
-            if(_initComplete)
+            if(_ovr.IsInitialized() && _settings.ReplaceShortcut)
             {
                 _isHookedForScreenshots = _ovr.HookScreenshots();
             }
         }
 
-        public void SetOutputFolder(string path)
+        public void UpdateOutputFolder(bool createDirIfNeeded=false)
         {
-            _ovr.SetScreenshotOutputFolder(path);
+            if(_settings.Directory != string.Empty)
+            {
+                var dir = _settings.Directory;
+                if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                if(_settings.Subfolder && _currentAppId != string.Empty)
+                {
+                    Debug.WriteLine($"Settings subfolder to: {_currentAppId}");
+                    dir = $"{dir}\\{_currentAppId}";
+                    if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                }
+                _ovr.SetScreenshotOutputFolder(dir);
+            } else
+            {
+                Debug.WriteLine("No output directory set.");
+            }
         }
 
         private void ShutdownIfWeShould()
@@ -169,10 +183,7 @@ namespace SuperScreenShotterVR
             var prefix = _currentAppId.StartsWith("steam.app.") ? _currentAppId.Split('.').Last() : _currentAppId;
             if(prefix != string.Empty)
             {
-                // TODO: Check if output directory exists?
-                // if (!Directory.Exists(_currentOutputPath)) Directory.CreateDirectory(_currentOutputPath);
-
-
+                UpdateOutputFolder(true);
                 var success = _ovr.TakeScreenshot(out var result, prefix);
                 _lastScreenshotResult = result;
                 if (!success) _isTakingScreenshot = false;
@@ -201,7 +212,7 @@ namespace SuperScreenShotterVR
                     {
                         var image = Image.FromFile(filePath);
                         var bitmap = ResizeImage(image, 256, 256);
-                        SetAlpha(ref bitmap, 255);
+                        // SetAlpha(ref bitmap, 255);
                         notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap, true);
                     }
                 } else
