@@ -33,6 +33,7 @@ namespace SuperScreenShotterVR
         {
             InitializeComponent();
             InitSettings();
+
             _controller.StatusUpdateAction = (status) =>
             {
                 Dispatcher.Invoke(() =>
@@ -54,6 +55,9 @@ namespace SuperScreenShotterVR
 
         private void InitSettings()
         {
+            Label_Version.Content = _settings.Version;
+            TextBox_TimerSeconds.IsEnabled = !_settings.CaptureTimer;
+
             if (_settings.Directory == string.Empty)
             {
                 _settings.Directory = Directory.GetCurrentDirectory();
@@ -65,10 +69,12 @@ namespace SuperScreenShotterVR
             TextBox_TimerSeconds.Text = _settings.TimerSeconds.ToString();
             CheckBox_SubmitToSteam.IsChecked = _settings.SubmitToSteam;
             TextBox_Directory.Text = _settings.Directory;
+            TextBox_Directory.ToolTip = _settings.Directory;
 
             CheckBox_Notifications.IsChecked = _settings.Notifications;
             CheckBox_Thumbnail.IsChecked = _settings.Thumbnail;
             CheckBox_Audio.IsChecked = _settings.Audio;
+            TextBox_CustomAudio.Text = _settings.CustomAudio;
             TextBox_CustomAudio.Text = _settings.CustomAudio;
 
             CheckBox_ReplaceShortcut.IsChecked = _settings.ReplaceShortcut;
@@ -90,8 +96,10 @@ namespace SuperScreenShotterVR
 
         private void CheckBox_CaptureTimer_Checked(object sender, RoutedEventArgs e)
         {
-            _settings.SuperSampling = CheckboxValue(e);
+            var value = CheckboxValue(e);
+            _settings.SuperSampling = value;
             _settings.Save();
+            TextBox_TimerSeconds.IsEnabled = !value;
         }
 
         private void CheckBox_SubmitToSteam_Checked(object sender, RoutedEventArgs e)
@@ -108,8 +116,9 @@ namespace SuperScreenShotterVR
             {
                 _settings.Directory = dialog.SelectedPath;
                 _settings.Save();
-                TextBox_Directory.Text = _settings.Directory;
                 _controller.UpdateOutputFolder();
+                TextBox_Directory.Text = _settings.Directory;
+                TextBox_Directory.ToolTip = _settings.Directory;
             }
         }
 
@@ -141,6 +150,7 @@ namespace SuperScreenShotterVR
                 _settings.CustomAudio = dialog.FileName;
                 _settings.Save();
                 TextBox_CustomAudio.Text = _settings.CustomAudio;
+                TextBox_CustomAudio.ToolTip = _settings.CustomAudio;
             }
         }
 
@@ -171,6 +181,20 @@ namespace SuperScreenShotterVR
         private void CheckBox_Tray_Checked(object sender, RoutedEventArgs e)
         {
             _settings.Tray = CheckboxValue(e);
+            _settings.Save();
+        }
+
+        private void ClickedURL(object sender, RoutedEventArgs e)
+        {
+            var link = (Hyperlink)sender;
+            Process.Start(link.NavigateUri.ToString());
+        }
+
+        private void TextBox_TimerSeconds_LostFocus(object sender, RoutedEventArgs e)
+        {
+            int.TryParse(TextBox_TimerSeconds.Text, out int result);
+            _settings.TimerSeconds = result;
+            TextBox_TimerSeconds.Text = result.ToString();
             _settings.Save();
         }
     }

@@ -38,5 +38,8 @@
     <Setting Name="SubmitToSteam" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="Version" Type="System.String" Scope="User">
+      <Value Profile="(Default)">v0.14</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

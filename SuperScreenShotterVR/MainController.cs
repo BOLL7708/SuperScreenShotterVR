@@ -82,7 +82,7 @@ namespace SuperScreenShotterVR
 
                         // Events
                         _ovr.RegisterEvent(EVREventType.VREvent_RequestScreenshot, (data) => { 
-                            Debug.WriteLine("Screenshot requested");
+                            Debug.WriteLine("Screenshot requested, setting state to false.");
 
                             // This happens after running TakeScreenshot() with no application running
                             // It leaves us with an error akin to ScreenshotAlreadyInProgress until
@@ -99,7 +99,7 @@ namespace SuperScreenShotterVR
                             ScreenShotTaken();
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotFailed, (data) => {
-                            Debug.WriteLine("Screenshot failed");
+                            Debug.WriteLine("Screenshot failed, setting state to false.");
                             _isTakingScreenshot = false;
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotProgressToDashboard, (data) => {
@@ -108,7 +108,8 @@ namespace SuperScreenShotterVR
                         _ovr.RegisterEvent(EVREventType.VREvent_SceneApplicationChanged, (data) => {
                             _currentAppId = _ovr.GetRunningApplicationId();
                             AppUpdateAction.Invoke(_currentAppId);
-                            UpdateScreenshotHook(); // At some occations we seem to lose the hook, so we redo it, seems fine.
+                            _isHookedForScreenshots = false;
+                            UpdateScreenshotHook(); // Hook at new application as it seems to occasionally get dropped
                             UpdateOutputFolder();                           
                             Debug.WriteLine("New application running");
                         });
@@ -134,9 +135,10 @@ namespace SuperScreenShotterVR
 
         public void UpdateScreenshotHook()
         {
-            if(_ovr.IsInitialized() && _settings.ReplaceShortcut)
+            if(_ovr.IsInitialized() && _settings.ReplaceShortcut && !_isHookedForScreenshots)
             {
                 _isHookedForScreenshots = _ovr.HookScreenshots();
+                Debug.WriteLine($"Hooking for screenshots: {_isHookedForScreenshots}");
             }
         }
 
@@ -204,28 +206,32 @@ namespace SuperScreenShotterVR
 
         private void ScreenshotTriggered()
         {
-            if (_isTakingScreenshot)
+            if (_isTakingScreenshot) // TODO: This can freak out at times, replace with queue
             {
-                Debug.WriteLine("We are already taking a screenshot!");
+                Debug.WriteLine("State was true, we are already taking a screenshot!");
                 return;
             }
-            _isTakingScreenshot = true;
 
             if(_currentAppId != string.Empty) // There needs to be a running application
             {
+                _ovr.SubmitScreenshotToSteam(new ScreenshotResult());
+                Debug.WriteLine("Taking screenshot, setting state to true!");
+                _isTakingScreenshot = true;
                 UpdateOutputFolder(true); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture
                 _lastScreenshotResult = result;
-                if (!success)
+                if (success)
                 {
-                    Debug.WriteLine("Taking a screenshot failed.");
+                    if (_settings.Audio) PlayScreenshotSound(); // Sound effect
+                } else 
+                {
+                    Debug.WriteLine("Taking a screenshot failed, setting state to false.");
                     _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // Will fix screenshot in progress limbo when spamming screenshots
                     _isTakingScreenshot = false;
                 }
-                else if(_settings.Audio) PlayScreenshotSound(); // Sound effect
             } else
             {
-                Debug.WriteLine("No application is running.");
+                Debug.WriteLine("No application is running, settings state to false.");
                 _isTakingScreenshot = false;
             }
         }
@@ -248,7 +254,7 @@ namespace SuperScreenShotterVR
                     {
                         var image = Image.FromFile(filePath);
                         var bitmap = ResizeImage(image, 256, 256);
-                        // SetAlpha(ref bitmap, 255);
+                        SetAlpha(ref bitmap, 255);
                         notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap, true);
                     }
                 } else
@@ -263,6 +269,7 @@ namespace SuperScreenShotterVR
             {
                 _ovr.EnqueueNotification(_overlayHandle, "Screenshot taken!", notificationBitmap);
             }
+            Debug.WriteLine("Screenshot taken done, setting state to false.");
             _isTakingScreenshot = false;
         }
 
