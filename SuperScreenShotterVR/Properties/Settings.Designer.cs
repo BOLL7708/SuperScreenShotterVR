@@ -25,18 +25,6 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int CaptureDelay {
-            get {
-                return ((int)(this["CaptureDelay"]));
-            }
-            set {
-                this["CaptureDelay"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool SuperSampling {
             get {
@@ -68,30 +56,6 @@ namespace SuperScreenShotterVR.Properties {
             }
             set {
                 this["TimerSeconds"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool FilenamePrefix {
-            get {
-                return ((bool)(this["FilenamePrefix"]));
-            }
-            set {
-                this["FilenamePrefix"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Subfolder {
-            get {
-                return ((bool)(this["Subfolder"]));
-            }
-            set {
-                this["Subfolder"] = value;
             }
         }
         
@@ -188,18 +152,6 @@ namespace SuperScreenShotterVR.Properties {
             }
             set {
                 this["Tray"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool DelayCapture {
-            get {
-                return ((bool)(this["DelayCapture"]));
-            }
-            set {
-                this["DelayCapture"] = value;
             }
         }
         

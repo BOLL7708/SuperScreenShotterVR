@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using Valve.VR;
 using static BOLL7708.EasyOpenVRSingleton;
 
@@ -26,11 +27,21 @@ namespace SuperScreenShotterVR
         private ScreenshotResult _lastScreenshotResult = null;
         private bool _isTakingScreenshot = false;
         private bool _shouldShutDown = false;
-        
+        private MediaPlayer _mediaPlayer;
+        private Thread _workerThread;
+        private string _currentAudio = string.Empty;
+
+        // Actions
+        public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
+        public Action<string> AppUpdateAction { get; set; } = (appId) => { Debug.WriteLine("No appID action set."); };
+
         public void Init()
         {
-            var workerThread = new Thread(WorkerThread);
-            workerThread.Start();
+            StatusUpdateAction.Invoke(false);
+            AppUpdateAction.Invoke("");
+
+            _workerThread = new Thread(WorkerThread);
+            _workerThread.Start();
         }
 
         private void WorkerThread()
@@ -45,6 +56,7 @@ namespace SuperScreenShotterVR
                         Debug.WriteLine(message);
                     });
                     _ovr.Init();
+                    StatusUpdateAction(_ovr.IsInitialized());
                     Thread.Sleep(1000);
                 }
                 else
@@ -53,6 +65,9 @@ namespace SuperScreenShotterVR
                     {
                         // Screenshots
                         UpdateScreenshotHook();
+                        PlayScreenshotSound(true);
+                        _currentAppId = _ovr.GetRunningApplicationId();
+                        AppUpdateAction.Invoke(_currentAppId);
 
                         // Input
                         _ovr.LoadAppManifest("./app.vrmanifest");
@@ -92,11 +107,9 @@ namespace SuperScreenShotterVR
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_SceneApplicationChanged, (data) => {
                             _currentAppId = _ovr.GetRunningApplicationId();
-
-                            // At some occations we seem to lose the hook, so we redo it, seems fine.
-                            UpdateScreenshotHook();
-                            UpdateOutputFolder();
-
+                            AppUpdateAction.Invoke(_currentAppId);
+                            UpdateScreenshotHook(); // At some occations we seem to lose the hook, so we redo it, seems fine.
+                            UpdateOutputFolder();                           
                             Debug.WriteLine("New application running");
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_QuitAcknowledged, (data) =>
@@ -133,7 +146,7 @@ namespace SuperScreenShotterVR
             {
                 var dir = _settings.Directory;
                 if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                if(_settings.Subfolder && _currentAppId != string.Empty)
+                if(_currentAppId != string.Empty)
                 {
                     Debug.WriteLine($"Settings subfolder to: {_currentAppId}");
                     dir = $"{dir}\\{_currentAppId}";
@@ -171,6 +184,24 @@ namespace SuperScreenShotterVR
             Debug.WriteLine($"Screenshot taken! Original scale: {originalScale}");
         }
 
+        private void PlayScreenshotSound(bool onlyLoad = false)
+        {
+            if(_mediaPlayer == null) _mediaPlayer = new MediaPlayer();
+            if(_currentAudio != _settings.CustomAudio)
+            {
+                _currentAudio = _settings.CustomAudio;
+                if(_currentAudio != string.Empty && File.Exists(_currentAudio))
+                {
+                    _mediaPlayer.Open(new Uri(_currentAudio));
+                }
+            }
+            if(!onlyLoad)
+            {
+                _mediaPlayer.Stop();
+                _mediaPlayer.Play();
+            }
+        }
+
         private void ScreenshotTriggered()
         {
             if (_isTakingScreenshot)
@@ -180,13 +211,18 @@ namespace SuperScreenShotterVR
             }
             _isTakingScreenshot = true;
 
-            var prefix = _currentAppId.StartsWith("steam.app.") ? _currentAppId.Split('.').Last() : _currentAppId;
-            if(prefix != string.Empty)
+            if(_currentAppId != string.Empty) // There needs to be a running application
             {
-                UpdateOutputFolder(true);
-                var success = _ovr.TakeScreenshot(out var result, prefix);
+                UpdateOutputFolder(true); // Output folder
+                var success = _ovr.TakeScreenshot(out var result); // Capture
                 _lastScreenshotResult = result;
-                if (!success) _isTakingScreenshot = false;
+                if (!success)
+                {
+                    Debug.WriteLine("Taking a screenshot failed.");
+                    _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // Will fix screenshot in progress limbo when spamming screenshots
+                    _isTakingScreenshot = false;
+                }
+                else if(_settings.Audio) PlayScreenshotSound(); // Sound effect
             } else
             {
                 Debug.WriteLine("No application is running.");

@@ -5,36 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuperScreenShotterVR"
         mc:Ignorable="d"
-        Title="SuperScreenShotterVR" Height="450" Width="800">
+        Title="SuperScreenShotterVR" Height="400" Width="400">
     <DockPanel LastChildFill="True">
-        <GroupBox Header="Capture" DockPanel.Dock="Top">
+        <GroupBox Header="Status" DockPanel.Dock="Top">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
+                    <Label Content="OpenVR Status:"/>
+                    <Label x:Name="Label_Status" Content="OpenVR Status" Background="Gray" Foreground="White"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Current AppID:"/>
+                    <Label x:Name="Label_AppId" Content="Steam AppID" Background="Gray" Foreground="White"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="System" DockPanel.Dock="Top">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox x:Name="CheckBox_DelayCapture" Content="Delay capture with: " Checked="CheckBox_DelayCapture_Checked" Unchecked="CheckBox_DelayCapture_Checked"/>
-                    <TextBox x:Name="TextBox_CaptureDelay" IsEnabled="False">0</TextBox>
-                    <Label Content="ms"/>
+                    <CheckBox x:Name="CheckBox_LaunchMinimized" Content="Launch minimized " Checked="CheckBox_LaunchMinimized_Checked" Unchecked="CheckBox_LaunchMinimized_Checked"/>
+                    <CheckBox x:Name="CheckBox_Tray" Content="to tray" Checked="CheckBox_Tray_Checked" Unchecked="CheckBox_Tray_Checked"/>
                 </StackPanel>
+                <CheckBox x:Name="CheckBox_ReplaceShortcut" Content="Replace SteamVR screenshot function" Checked="CheckBox_ReplaceShortcut_Checked" Unchecked="CheckBox_ReplaceShortcut_Checked"/>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="Capture &amp; Output" DockPanel.Dock="Top">
+            <StackPanel Orientation="Vertical">
                 <CheckBox x:Name="CheckBox_SuperSampling" Content="Attempt super sampling boost for capture" Checked="CheckBox_SuperSampling_Checked" Unchecked="CheckBox_SuperSampling_Checked"/>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="CheckBox_CaptureTimer" Content="Capture on a timer every: " Checked="CheckBox_CaptureTimer_Checked" Unchecked="CheckBox_CaptureTimer_Checked"/>
                     <TextBox x:Name="TextBox_TimerSeconds" Text="0"/>
                     <Label Content="seconds"/>
                 </StackPanel>
-            </StackPanel>
-        </GroupBox>
-        <GroupBox Header="Output" DockPanel.Dock="Top">
-            <StackPanel Orientation="Vertical">
                 <CheckBox x:Name="CheckBox_SubmitToSteam" Content="Submit screenshots to Steam" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
-                <CheckBox x:Name="CheckBox_FilenamePrefix"  Content="Prefix filename with app ID" Checked="CheckBox_FilenamePrefix_Checked" Unchecked="CheckBox_FilenamePrefix_Checked"/>
-                <CheckBox x:Name="CheckBox_Subfolder" Content="Save in subfolder based on app ID" Checked="CheckBox_Subfolder_Checked" Unchecked="CheckBox_Subfolder_Checked"/>
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="Directory:"/>
+                    <Label Content="Output root folder:"/>
                     <Button x:Name="Button_BrowseDirectory" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
                     <TextBox x:Name="TextBox_Directory" Text="C:\Bla bla bla" IsEnabled="False"/>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Header="Notifications" DockPanel.Dock="Top">
+        <GroupBox Header="Notifications">
             <StackPanel Orientation="Vertical">
                 <CheckBox x:Name="CheckBox_Notifications" Content="Display notification on screenshot capture" Checked="CheckBox_Notifications_Checked" Unchecked="CheckBox_Notifications_Checked"/>
                 <CheckBox x:Name="CheckBox_Thumbnail"  Content="Display thumbnail of captured screenshot" Checked="CheckBox_Thumbnail_Checked" Unchecked="CheckBox_Thumbnail_Checked"/>
@@ -46,14 +56,6 @@
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Header="System">
-            <StackPanel Orientation="Vertical">
-                <CheckBox x:Name="CheckBox_ReplaceShortcut" Content="Replace SteamVR screenshot function" Checked="CheckBox_ReplaceShortcut_Checked" Unchecked="CheckBox_ReplaceShortcut_Checked"/>
-                <StackPanel Orientation="Horizontal">
-                    <CheckBox x:Name="CheckBox_LaunchMinimized" Content="Launch minimized " Checked="CheckBox_LaunchMinimized_Checked" Unchecked="CheckBox_LaunchMinimized_Checked"/>
-                    <CheckBox x:Name="CheckBox_Tray" Content="to tray" Checked="CheckBox_Tray_Checked" Unchecked="CheckBox_Tray_Checked"/>
-                </StackPanel>
-            </StackPanel>
-        </GroupBox>
+
     </DockPanel>
 </Window>

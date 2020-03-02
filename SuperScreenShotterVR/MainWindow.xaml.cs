@@ -33,6 +33,22 @@ namespace SuperScreenShotterVR
         {
             InitializeComponent();
             InitSettings();
+            _controller.StatusUpdateAction = (status) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    Label_Status.Content = status ? "Connected" : "Disconnected";
+                    Label_Status.Background = status ? System.Windows.Media.Brushes.OliveDrab : System.Windows.Media.Brushes.Tomato;
+                });
+            };
+            _controller.AppUpdateAction = (appId) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    Label_AppId.Content = appId != string.Empty ? appId : "None";
+                    Label_AppId.Background = appId != string.Empty ? System.Windows.Media.Brushes.OliveDrab : System.Windows.Media.Brushes.Gray;
+                });
+            };
             _controller.Init();
         }
 
@@ -44,15 +60,10 @@ namespace SuperScreenShotterVR
                 _settings.Save();
             }
 
-            CheckBox_DelayCapture.IsChecked = _settings.DelayCapture;
-            TextBox_CaptureDelay.Text = _settings.CaptureDelay.ToString();
             CheckBox_SuperSampling.IsChecked = _settings.SuperSampling;
             CheckBox_CaptureTimer.IsChecked = _settings.CaptureTimer;
             TextBox_TimerSeconds.Text = _settings.TimerSeconds.ToString();
-
             CheckBox_SubmitToSteam.IsChecked = _settings.SubmitToSteam;
-            CheckBox_FilenamePrefix.IsChecked = _settings.FilenamePrefix;
-            CheckBox_Subfolder.IsChecked = _settings.Subfolder;
             TextBox_Directory.Text = _settings.Directory;
 
             CheckBox_Notifications.IsChecked = _settings.Notifications;
@@ -69,12 +80,6 @@ namespace SuperScreenShotterVR
         {
             var name = e.RoutedEvent.Name;
             return name == "Checked";
-        }
-
-        private void CheckBox_DelayCapture_Checked(object sender, RoutedEventArgs e)
-        {
-            _settings.DelayCapture = CheckboxValue(e);
-            _settings.Save();
         }
 
         private void CheckBox_SuperSampling_Checked(object sender, RoutedEventArgs e)
@@ -95,22 +100,17 @@ namespace SuperScreenShotterVR
             _settings.Save();
         }
 
-        private void CheckBox_FilenamePrefix_Checked(object sender, RoutedEventArgs e)
-        {
-            _settings.FilenamePrefix = CheckboxValue(e);
-            _settings.Save();
-        }
-
-        private void CheckBox_Subfolder_Checked(object sender, RoutedEventArgs e)
-        {
-            _settings.Subfolder = CheckboxValue(e);
-            _settings.Save();
-        }
-
         private void Button_BrowseDirectory_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Should update the folder in the controller.
-            _controller.UpdateOutputFolder();
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            if(result == System.Windows.Forms.DialogResult.OK)
+            {
+                _settings.Directory = dialog.SelectedPath;
+                _settings.Save();
+                TextBox_Directory.Text = _settings.Directory;
+                _controller.UpdateOutputFolder();
+            }
         }
 
         private void CheckBox_Notifications_Checked(object sender, RoutedEventArgs e)
@@ -133,7 +133,15 @@ namespace SuperScreenShotterVR
 
         private void Button_BrowseAudio_Click(object sender, RoutedEventArgs e)
         {
-
+            var dialog = new System.Windows.Forms.OpenFileDialog();
+            dialog.Filter = "Waveform Audio File|*.wav";
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                _settings.CustomAudio = dialog.FileName;
+                _settings.Save();
+                TextBox_CustomAudio.Text = _settings.CustomAudio;
+            }
         }
 
         private void CheckBox_ReplaceShortcut_Checked(object sender, RoutedEventArgs e)
