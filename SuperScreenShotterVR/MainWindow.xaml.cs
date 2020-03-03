@@ -68,14 +68,14 @@ namespace SuperScreenShotterVR
             CheckBox_CaptureTimer.IsChecked = _settings.CaptureTimer;
             TextBox_TimerSeconds.Text = _settings.TimerSeconds.ToString();
             CheckBox_SubmitToSteam.IsChecked = _settings.SubmitToSteam;
-            TextBox_Directory.Text = _settings.Directory;
-            TextBox_Directory.ToolTip = _settings.Directory;
+            Label_Directory.Content = _settings.Directory;
+            Label_Directory.ToolTip = _settings.Directory;
 
             CheckBox_Notifications.IsChecked = _settings.Notifications;
             CheckBox_Thumbnail.IsChecked = _settings.Thumbnail;
             CheckBox_Audio.IsChecked = _settings.Audio;
-            TextBox_CustomAudio.Text = _settings.CustomAudio;
-            TextBox_CustomAudio.Text = _settings.CustomAudio;
+            Label_CustomAudio.Content = _settings.CustomAudio;
+            Label_CustomAudio.ToolTip = _settings.CustomAudio;
 
             CheckBox_ReplaceShortcut.IsChecked = _settings.ReplaceShortcut;
             CheckBox_LaunchMinimized.IsChecked = _settings.LaunchMinimized;
@@ -117,8 +117,8 @@ namespace SuperScreenShotterVR
                 _settings.Directory = dialog.SelectedPath;
                 _settings.Save();
                 _controller.UpdateOutputFolder();
-                TextBox_Directory.Text = _settings.Directory;
-                TextBox_Directory.ToolTip = _settings.Directory;
+                Label_Directory.Content = _settings.Directory;
+                Label_Directory.ToolTip = _settings.Directory;
             }
         }
 
@@ -149,8 +149,8 @@ namespace SuperScreenShotterVR
             {
                 _settings.CustomAudio = dialog.FileName;
                 _settings.Save();
-                TextBox_CustomAudio.Text = _settings.CustomAudio;
-                TextBox_CustomAudio.ToolTip = _settings.CustomAudio;
+                Label_CustomAudio.Content = _settings.CustomAudio;
+                Label_CustomAudio.ToolTip = _settings.CustomAudio;
             }
         }
 

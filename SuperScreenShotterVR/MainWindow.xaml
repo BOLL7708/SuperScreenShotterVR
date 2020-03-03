@@ -52,7 +52,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Output root folder:"/>
                     <Button x:Name="Button_BrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
-                    <TextBox x:Name="TextBox_Directory" Padding="4" Text="C:\Bla bla bla" IsEnabled="False"/>
+                    <Label x:Name="Label_Directory" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
@@ -64,7 +64,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Sound file:"/>
                     <Button x:Name="Button_BrowseAudio" Padding="4" Content="Browse..." Click="Button_BrowseAudio_Click"/>
-                    <TextBox x:Name="TextBox_CustomAudio" Padding="4" Text="C:\Bla bla bla" IsEnabled="False"/>
+                    <Label x:Name="Label_CustomAudio" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
