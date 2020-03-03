@@ -24,8 +24,7 @@ namespace SuperScreenShotterVR
         private bool _isHookedForScreenshots = false;
         private string _currentAppId = "";
         private ulong _overlayHandle = 0;
-        private ScreenshotResult _lastScreenshotResult = null;
-        private bool _isTakingScreenshot = false;
+        private List<ScreenshotResult> _screenshotQueue = new List<ScreenshotResult>();
         private bool _shouldShutDown = false;
         private MediaPlayer _mediaPlayer;
         private Thread _workerThread;
@@ -82,13 +81,11 @@ namespace SuperScreenShotterVR
 
                         // Events
                         _ovr.RegisterEvent(EVREventType.VREvent_RequestScreenshot, (data) => { 
-                            Debug.WriteLine("Screenshot requested, setting state to false.");
+                            Debug.WriteLine("OBS! Screenshot request.");
 
                             // This happens after running TakeScreenshot() with no application running
                             // It leaves us with an error akin to ScreenshotAlreadyInProgress until
-                            // we submit an empty result to Steam, for some reason, so here we are.
-                            _ovr.SubmitScreenshotToSteam(new ScreenshotResult());
-                            _isTakingScreenshot = false;
+                            // we submit an empty result to Steam, we do that in ScreenShotTriggered().
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTriggered, (data) => {
                             Debug.WriteLine("Screenshot triggered");
@@ -99,8 +96,7 @@ namespace SuperScreenShotterVR
                             ScreenShotTaken();
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotFailed, (data) => {
-                            Debug.WriteLine("Screenshot failed, setting state to false.");
-                            _isTakingScreenshot = false;
+                            Debug.WriteLine("Screenshot failed");
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotProgressToDashboard, (data) => {
                             Debug.WriteLine("Screenshot progress to dashboard");
@@ -108,10 +104,10 @@ namespace SuperScreenShotterVR
                         _ovr.RegisterEvent(EVREventType.VREvent_SceneApplicationChanged, (data) => {
                             _currentAppId = _ovr.GetRunningApplicationId();
                             AppUpdateAction.Invoke(_currentAppId);
-                            _isHookedForScreenshots = false;
+                            _isHookedForScreenshots = false; // To enable rehooking
                             UpdateScreenshotHook(); // Hook at new application as it seems to occasionally get dropped
                             UpdateOutputFolder();                           
-                            Debug.WriteLine("New application running");
+                            Debug.WriteLine($"New application running: {_currentAppId}");
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_QuitAcknowledged, (data) =>
                         {
@@ -206,47 +202,38 @@ namespace SuperScreenShotterVR
 
         private void ScreenshotTriggered()
         {
-            if (_isTakingScreenshot) // TODO: This can freak out at times, replace with queue
-            {
-                Debug.WriteLine("State was true, we are already taking a screenshot!");
-                return;
-            }
-
             if(_currentAppId != string.Empty) // There needs to be a running application
             {
-                _ovr.SubmitScreenshotToSteam(new ScreenshotResult());
-                Debug.WriteLine("Taking screenshot, setting state to true!");
-                _isTakingScreenshot = true;
+                Debug.WriteLine("Taking screenshot!");
+                _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 UpdateOutputFolder(true); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture
-                _lastScreenshotResult = result;
+                if (result != null) _screenshotQueue.Add(result);
                 if (success)
                 {
                     if (_settings.Audio) PlayScreenshotSound(); // Sound effect
-                } else 
+                } 
+                else 
                 {
-                    Debug.WriteLine("Taking a screenshot failed, setting state to false.");
+                    Debug.WriteLine("Taking a screenshot failed");
                     _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // Will fix screenshot in progress limbo when spamming screenshots
-                    _isTakingScreenshot = false;
                 }
-            } else
-            {
-                Debug.WriteLine("No application is running, settings state to false.");
-                _isTakingScreenshot = false;
-            }
+            } else Debug.WriteLine("No application is running");
         }
 
         private void ScreenShotTaken()
         {
             var notificationBitmap = new NotificationBitmap_t();
-            if (_lastScreenshotResult != null)
+            if (_screenshotQueue.Count() > 0) // TODO: Maybe loop through all in the queue here to avoid orphans? Use a lock maybe?
             {
-                var filePath = $"{_lastScreenshotResult.filePath}.png";
+                ScreenshotResult result = _screenshotQueue[0];
+                _screenshotQueue.RemoveAt(0);
+                var filePath = $"{result.filePath}.png";
                 if(File.Exists(filePath))
                 {
                     if(_settings.SubmitToSteam && _currentAppId != string.Empty)
                     {
-                        var submitted = _ovr.SubmitScreenshotToSteam(_lastScreenshotResult);
+                        var submitted = _ovr.SubmitScreenshotToSteam(result);
                         Debug.WriteLine($"Managed to submit the screenshot to Steam: {submitted}");
                     } else Debug.WriteLine("Will not submit the screenshot to Steam.");
 
@@ -263,14 +250,13 @@ namespace SuperScreenShotterVR
                 }
             } else
             {
-                Debug.WriteLine("Screenshot result was null.");
+                Debug.WriteLine("Screenshot result was null");
             }
             if(_settings.Notifications)
             {
                 _ovr.EnqueueNotification(_overlayHandle, "Screenshot taken!", notificationBitmap);
             }
-            Debug.WriteLine("Screenshot taken done, setting state to false.");
-            _isTakingScreenshot = false;
+            Debug.WriteLine("Screenshot taken done");
         }
 
         // https://stackoverflow.com/a/24199315
