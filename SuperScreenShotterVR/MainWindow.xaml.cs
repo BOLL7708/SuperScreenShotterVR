@@ -97,7 +97,7 @@ namespace SuperScreenShotterVR
         private void CheckBox_CaptureTimer_Checked(object sender, RoutedEventArgs e)
         {
             var value = CheckboxValue(e);
-            _settings.SuperSampling = value;
+            _settings.CaptureTimer = value;
             _settings.Save();
             TextBox_TimerSeconds.IsEnabled = !value;
         }

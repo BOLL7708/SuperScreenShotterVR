@@ -24,11 +24,12 @@ namespace SuperScreenShotterVR
         private bool _isHookedForScreenshots = false;
         private string _currentAppId = "";
         private ulong _overlayHandle = 0;
-        private List<ScreenshotResult> _screenshotQueue = new List<ScreenshotResult>();
+        private Dictionary<uint, ScreenshotResult> _screenshotQueue = new Dictionary<uint, ScreenshotResult>();
         private bool _shouldShutDown = false;
         private MediaPlayer _mediaPlayer;
         private Thread _workerThread;
         private string _currentAudio = string.Empty;
+        private Stopwatch _stopWatch = new Stopwatch();
 
         // Actions
         public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
@@ -88,12 +89,12 @@ namespace SuperScreenShotterVR
                             // we submit an empty result to Steam, we do that in ScreenShotTriggered().
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTriggered, (data) => {
-                            Debug.WriteLine("Screenshot triggered");
+                            Debug.WriteLine($"Screenshot triggered, handle: {data.data.screenshot.handle}");
                             if (_isHookedForScreenshots) ScreenshotTriggered();
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTaken, (data) => {
-                            Debug.WriteLine("Screenshot taken");
-                            ScreenShotTaken();
+                            Debug.WriteLine($"Screenshot taken, handle: {data.data.screenshot.handle}");
+                            ScreenShotTaken(data.data);
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotFailed, (data) => {
                             Debug.WriteLine("Screenshot failed");
@@ -122,8 +123,23 @@ namespace SuperScreenShotterVR
                     {
                         _ovr.UpdateActionStates();
                         _ovr.UpdateEvents();
+
+                        if(_settings.CaptureTimer)
+                        {
+                            if (!_stopWatch.IsRunning) _stopWatch.Start();
+                            if(_stopWatch.Elapsed.TotalSeconds >= _settings.TimerSeconds)
+                            {
+                                Debug.WriteLine("Timer triggered!");
+                                // TODO: Capture screenshots without pushing notification? In that case, save separate list with handles?
+                                ScreenshotTriggered();
+                                _stopWatch.Restart();
+                            }
+                        } else if(_stopWatch.IsRunning)
+                        {
+                            _stopWatch.Stop();
+                        }
+
                         ShutdownIfWeShould();
-                        // TODO: keep track of timer here, if active.
                     }
                 }
             }
@@ -208,7 +224,7 @@ namespace SuperScreenShotterVR
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 UpdateOutputFolder(true); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture
-                if (result != null) _screenshotQueue.Add(result);
+                if (result != null) _screenshotQueue.Add(result.handle, result);
                 if (success)
                 {
                     if (_settings.Audio) PlayScreenshotSound(); // Sound effect
@@ -221,13 +237,12 @@ namespace SuperScreenShotterVR
             } else Debug.WriteLine("No application is running");
         }
 
-        private void ScreenShotTaken()
+        private void ScreenShotTaken(VREvent_Data_t data)
         {
             var notificationBitmap = new NotificationBitmap_t();
-            if (_screenshotQueue.Count() > 0) // TODO: Maybe loop through all in the queue here to avoid orphans? Use a lock maybe?
+            if (_screenshotQueue.ContainsKey(data.screenshot.handle))
             {
-                ScreenshotResult result = _screenshotQueue[0];
-                _screenshotQueue.RemoveAt(0);
+                ScreenshotResult result = _screenshotQueue[data.screenshot.handle];
                 var filePath = $"{result.filePath}.png";
                 if(File.Exists(filePath))
                 {
@@ -248,15 +263,16 @@ namespace SuperScreenShotterVR
                 {
                     Debug.WriteLine($"Could not find screenshot after taking it: {filePath}");
                 }
+                _screenshotQueue.Remove(data.screenshot.handle);
             } else
             {
-                Debug.WriteLine("Screenshot result was null");
+                Debug.WriteLine($"Screenshot handle does not exist in queue? Handle: {data.screenshot.handle}");
             }
             if(_settings.Notifications)
             {
                 _ovr.EnqueueNotification(_overlayHandle, "Screenshot taken!", notificationBitmap);
             }
-            Debug.WriteLine("Screenshot taken done");
+            Debug.WriteLine($"Screenshot taken done, handle: {data.screenshot.handle}");
         }
 
         // https://stackoverflow.com/a/24199315
