@@ -44,10 +44,11 @@ namespace SuperScreenShotterVR
             };
             _controller.AppUpdateAction = (appId) =>
             {
+                var appIdFixed = appId.Replace("_", "__"); // Single underscores are interpret to show the next char as shortcut
                 Dispatcher.Invoke(() =>
                 {
-                    Label_AppId.Content = appId != string.Empty ? appId : "None";
-                    Label_AppId.Background = appId != string.Empty ? System.Windows.Media.Brushes.OliveDrab : System.Windows.Media.Brushes.Gray;
+                    Label_AppId.Content = appIdFixed != string.Empty ? appIdFixed : "None";
+                    Label_AppId.Background = appIdFixed != string.Empty ? System.Windows.Media.Brushes.OliveDrab : System.Windows.Media.Brushes.Gray;
                 });
             };
             _controller.Init();
