@@ -10,6 +10,11 @@
 			"name": "/actions/screenshots/in/take_screenshot",
 			"requirement": "optional",
 			"type": "boolean"
+		},
+		{
+			"name": "/actions/screenshots/in/show_viewfinder",
+			"requirement": "optional",
+			"type": "boolean"
 		}
 	],
 	"action_sets": [
@@ -22,7 +27,8 @@
 		{
 			"language_tag": "en_US",
 			"/actions/screenshots": "Screeenshots",
-			"/actions/screenshots/in/take_screenshot": "Take Screenshot"
+			"/actions/screenshots/in/take_screenshot": "Take Screenshot",
+			"/actions/screenshots/in/show_viewfinder": "Show Viewfinder"
 		}
 	]
 }

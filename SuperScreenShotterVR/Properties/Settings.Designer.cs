@@ -178,5 +178,17 @@ namespace SuperScreenShotterVR.Properties {
                 this["Version"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ViewFinder {
+            get {
+                return ((bool)(this["ViewFinder"]));
+            }
+            set {
+                this["ViewFinder"] = value;
+            }
+        }
     }
 }

@@ -23,13 +23,15 @@ namespace SuperScreenShotterVR
         private bool _initComplete = false;
         private bool _isHookedForScreenshots = false;
         private string _currentAppId = "";
-        private ulong _overlayHandle = 0;
+        private ulong _notificationOverlayHandle = 0;
         private Dictionary<uint, ScreenshotResult> _screenshotQueue = new Dictionary<uint, ScreenshotResult>();
         private bool _shouldShutDown = false;
         private MediaPlayer _mediaPlayer;
         private Thread _workerThread;
         private string _currentAudio = string.Empty;
         private Stopwatch _stopWatch = new Stopwatch();
+        private ulong _viewfinderOverlayHandle = 0;
+        private const string VIEWFINDER_OVERLAY_UNIQUE_KEY = "boll7708.superscreenshottervr.overlay.viewfinder";
 
         // Actions
         public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
@@ -37,6 +39,7 @@ namespace SuperScreenShotterVR
 
         public void Init()
         {
+            _ovr.SetApplicationType(EVRApplicationType.VRApplication_Overlay);
             StatusUpdateAction.Invoke(false);
             AppUpdateAction.Invoke("");
 
@@ -73,11 +76,17 @@ namespace SuperScreenShotterVR
                         _ovr.LoadAppManifest("./app.vrmanifest");
                         _ovr.LoadActionManifest("./actions.json");
                         _ovr.RegisterActionSet("/actions/screenshots");
+
+                        // TODO: After restart these do not get registered again??!!??
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/take_screenshot",
                             (data, handle) => { if (data.bState) ScreenshotTriggered(); }
                         );
-                        _overlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
+                        _ovr.RegisterDigitalAction(
+                            "/actions/screenshots/in/show_viewfinder",
+                            (data, handle) => { ToggleViewfinder(data); }
+                        );
+                        _notificationOverlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
                         _currentAppId = _ovr.GetRunningApplicationId();
 
                         // Events
@@ -143,6 +152,36 @@ namespace SuperScreenShotterVR
                     }
                 }
             }
+        }
+
+        private void ToggleViewfinder(InputDigitalActionData_t data)
+        {
+            Debug.WriteLine($"Toggling viewfinder! {_viewfinderOverlayHandle}->{data.bState}");
+            _viewfinderOverlayHandle = _ovr.FindOverlay(VIEWFINDER_OVERLAY_UNIQUE_KEY);
+            if(_viewfinderOverlayHandle == 0)
+            {
+                // Overlay
+                var distance = 100;
+                var indexes = _ovr.GetIndexesForTrackedDeviceClass(ETrackedDeviceClass.HMD);
+                var overlayTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform();
+                overlayTransform.m11 = -distance;
+
+                // This assumes a square screenshot, might still work regardless but would need new texture.
+                var fov = _ovr.GetFloatTrackedDeviceProperty(0, ETrackedDeviceProperty.Prop_ScreenshotHorizontalFieldOfViewDegrees_Float);
+                var width = (float)Math.Tan(fov / 2f * Math.PI / 180) * distance * 2;
+                if (indexes.Length > 0 && width > 0)
+                {
+                    // Instantiate overlay
+                    var index = indexes[0];
+                    _viewfinderOverlayHandle = _ovr.CreateOverlay(VIEWFINDER_OVERLAY_UNIQUE_KEY, "SSSVRVF", overlayTransform, width, index);
+                    
+                    // Apply texture
+                    var path = $"{Directory.GetCurrentDirectory()}\\resources\\viewfinder.png";
+                    _ovr.SetOverlayTextureFromFile(_viewfinderOverlayHandle, path);
+                }
+            }
+            var success = _ovr.SetOverlayVisibility(_viewfinderOverlayHandle, data.bState && _settings.ViewFinder);
+            if (!success) _viewfinderOverlayHandle = 0;
         }
 
         public void UpdateScreenshotHook()
@@ -270,7 +309,7 @@ namespace SuperScreenShotterVR
             }
             if(_settings.Notifications)
             {
-                _ovr.EnqueueNotification(_overlayHandle, "Screenshot taken!", notificationBitmap);
+                _ovr.EnqueueNotification(_notificationOverlayHandle, "Screenshot taken!", notificationBitmap);
             }
             Debug.WriteLine($"Screenshot taken done, handle: {data.screenshot.handle}");
         }

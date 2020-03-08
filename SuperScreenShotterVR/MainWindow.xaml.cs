@@ -65,6 +65,13 @@ namespace SuperScreenShotterVR
                 _settings.Save();
             }
 
+            if (_settings.CustomAudio == string.Empty)
+            {
+                _settings.CustomAudio = $"{Directory.GetCurrentDirectory()}\\resources\\screenshot.wav";
+                _settings.Save();
+            }
+
+            CheckBox_ViewFinder.IsChecked = _settings.ViewFinder;
             CheckBox_SuperSampling.IsChecked = _settings.SuperSampling;
             CheckBox_CaptureTimer.IsChecked = _settings.CaptureTimer;
             TextBox_TimerSeconds.Text = _settings.TimerSeconds.ToString();
@@ -87,6 +94,12 @@ namespace SuperScreenShotterVR
         {
             var name = e.RoutedEvent.Name;
             return name == "Checked";
+        }
+
+        private void CheckBox_ViewFinder_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.ViewFinder = CheckboxValue(e);
+            _settings.Save();
         }
 
         private void CheckBox_SuperSampling_Checked(object sender, RoutedEventArgs e)
