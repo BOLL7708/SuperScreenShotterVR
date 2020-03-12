@@ -33,10 +33,14 @@ namespace SuperScreenShotterVR
         private const string VIEWFINDER_OVERLAY_UNIQUE_KEY = "boll7708.superscreenshottervr.overlay.viewfinder";
         private const string ROLL_INDICATOR_OVERLAY_UNIQUE_KEY = "boll7708.superscreenshottervr.overlay.rollindicator";
         private const string PITCH_INDICATOR_OVERLAY_UNIQUE_KEY = "boll7708.superscreenshottervr.overlay.pitchindicator";
+        private const string RETICLE_OVERLAY_UNIQUE_KEY = "boll7708.superscreenshottervr.overlay.reticle";
         private ulong _viewfinderOverlayHandle = 0;
         private ulong _rollIndicatorOverlayHandle = 0;
         private ulong _pitchIndicatorOverlayHandle = 0;
+        private ulong _reticleOverlayHandle = 0;
         private uint _trackedDeviceIndex = 0;
+        private float _overlayWidth = 0;
+        private OverlayTextureSize _reticleTextureSize = new OverlayTextureSize();
 
         // Actions
         public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
@@ -57,7 +61,7 @@ namespace SuperScreenShotterVR
             Thread.CurrentThread.IsBackground = true;
             while (true)
             {
-                Thread.Sleep(10); // 100 Hz
+                Thread.Sleep(1000/120); // TODO: Detect headset frame-rate changes?
                 if (!_ovr.IsInitialized())
                 {
                     _ovr.SetDebugLogAction((message) => {
@@ -76,6 +80,7 @@ namespace SuperScreenShotterVR
                         PlayScreenshotSound(true);
                         _currentAppId = _ovr.GetRunningApplicationId();
                         AppUpdateAction.Invoke(_currentAppId);
+                        ToggleViewfinder(true); // DEBUG
 
                         // Input
                         _ovr.LoadAppManifest("./app.vrmanifest");
@@ -91,7 +96,7 @@ namespace SuperScreenShotterVR
                         );
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/show_viewfinder",
-                            (data, handle) => { ToggleViewfinder(data); }
+                            (data, handle) => { ToggleViewfinder(data.bState); }
                         );
                         _notificationOverlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
                         _currentAppId = _ovr.GetRunningApplicationId();
@@ -173,34 +178,38 @@ namespace SuperScreenShotterVR
             if (indexes.Length > 0) _trackedDeviceIndex = indexes[0];
         }
 
-        private void ToggleViewfinder(InputDigitalActionData_t data)
+        private void ToggleViewfinder(bool visible)
         {
             _viewfinderOverlayHandle = _ovr.FindOverlay(VIEWFINDER_OVERLAY_UNIQUE_KEY);
             _rollIndicatorOverlayHandle = _ovr.FindOverlay(ROLL_INDICATOR_OVERLAY_UNIQUE_KEY);
             _pitchIndicatorOverlayHandle = _ovr.FindOverlay(PITCH_INDICATOR_OVERLAY_UNIQUE_KEY);
-            if(_viewfinderOverlayHandle == 0) _viewfinderOverlayHandle = CreateOverlay("viewfinder", VIEWFINDER_OVERLAY_UNIQUE_KEY, "SSSVRVF");
-            if(_rollIndicatorOverlayHandle == 0) _rollIndicatorOverlayHandle = CreateOverlay("rollindicator", ROLL_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRRI");
-            if(_pitchIndicatorOverlayHandle == 0) _pitchIndicatorOverlayHandle = CreateOverlay("pitchindicator", PITCH_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRPI");
-            var visible = data.bState && _settings.ViewFinder;
-            _ovr.SetOverlayVisibility(_viewfinderOverlayHandle, visible);
-            _ovr.SetOverlayVisibility(_rollIndicatorOverlayHandle, visible);
-            _ovr.SetOverlayVisibility(_pitchIndicatorOverlayHandle, visible);
+            _reticleOverlayHandle = _ovr.FindOverlay(RETICLE_OVERLAY_UNIQUE_KEY);
+            if (_viewfinderOverlayHandle == 0) _viewfinderOverlayHandle = CreateOverlay("viewfinder", VIEWFINDER_OVERLAY_UNIQUE_KEY, "SSSVRVF");
+            if(_rollIndicatorOverlayHandle == 0) _rollIndicatorOverlayHandle = CreateOverlay("rollindicator", ROLL_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRRI", true);
+            if(_pitchIndicatorOverlayHandle == 0) _pitchIndicatorOverlayHandle = CreateOverlay("pitchindicator", PITCH_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRPI", true);
+            if (_reticleOverlayHandle == 0) _reticleOverlayHandle = CreateOverlay("reticle", RETICLE_OVERLAY_UNIQUE_KEY, "SSSVRR", true);
+            var shouldBeVisible = visible && _settings.ViewFinder;
+            _ovr.SetOverlayVisibility(_viewfinderOverlayHandle, shouldBeVisible);
+            _ovr.SetOverlayVisibility(_rollIndicatorOverlayHandle, shouldBeVisible);
+            _ovr.SetOverlayVisibility(_pitchIndicatorOverlayHandle, shouldBeVisible);
+            _ovr.SetOverlayVisibility(_reticleOverlayHandle, shouldBeVisible);
         }
 
-        private ulong CreateOverlay(string imageFileName, string uniqueKey, string title) {
+        private ulong CreateOverlay(string imageFileName, string uniqueKey, string title, bool small=false) {
             // Overlay
-            ulong handle = 0;
             var index = _trackedDeviceIndex;
             var distance = _settings.OverlayDistance;
-            var overlayTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform();
+            var overlayTransform = Utils.GetEmptyTransform();
             overlayTransform.m11 = -distance;
                 
             // This assumes a square screenshot, might still work regardless but would need new texture.
             var fov = _ovr.GetFloatTrackedDeviceProperty(index, ETrackedDeviceProperty.Prop_ScreenshotHorizontalFieldOfViewDegrees_Float);
             var width = (float)Math.Tan(fov / 2f * Math.PI / 180) * distance * 2;
+            _overlayWidth = width;
+            if (small) width /= 4;
 
             // Instantiate overlay
-            handle = _ovr.CreateOverlay(uniqueKey, title, overlayTransform, width, index);
+            ulong handle = _ovr.CreateOverlay(uniqueKey, title, overlayTransform, width, index);
 
             // Apply texture
             var path = $"{Directory.GetCurrentDirectory()}\\resources\\{imageFileName}.png";
@@ -211,25 +220,32 @@ namespace SuperScreenShotterVR
         private void UpdateOverlays()
         {
             var poses = _ovr.GetDeviceToAbsoluteTrackingPose();
-            if(poses.Length > _trackedDeviceIndex)
+            if(poses.Length > _trackedDeviceIndex && _reticleTextureSize.aspectRatio != 0)
             {
                 // TODO: Something is wrong in the whole YPR<->Quaternion<->Matrix flow as pitch and roll are flipped.
                 var distance = _settings.OverlayDistance;
                 var pose = poses[_trackedDeviceIndex];
                 var hmdTransform = pose.mDeviceToAbsoluteTracking;
-                var YPR = EasyOpenVRSingleton.Utils.RotationMatrixToYPR(hmdTransform);
+                var YPR = Utils.RotationMatrixToYPR(hmdTransform);
 
                 var pitchYPR = new YPR { yaw = 0, pitch = 0, roll = 0 };
-                var pitchTransform = EasyOpenVRSingleton.Utils.GetTransformFromEuler(pitchYPR);
-                pitchTransform.m7 = (float) -YPR.roll * distance;
+                var pitchTransform = Utils.GetTransformFromEuler(pitchYPR);
+                var pitchY = (float) -YPR.roll * distance; // Y-pos, somehow this works
+                var limitY = _overlayWidth / 8 / _reticleTextureSize.aspectRatio;
+                if (pitchY > limitY) pitchY = limitY;
+                if (pitchY < -limitY) pitchY = -limitY;
+                pitchTransform.m7 = pitchY;
                 pitchTransform.m11 = -distance;
 
                 var rollYPR = new YPR { yaw = 0, pitch = -YPR.pitch, roll = 0 };
-                var rollTransform = EasyOpenVRSingleton.Utils.GetTransformFromEuler(rollYPR);
+                var rollTransform = Utils.GetTransformFromEuler(rollYPR);
                 rollTransform.m11 = -distance;
 
                 if (_ovr.FindOverlay(PITCH_INDICATOR_OVERLAY_UNIQUE_KEY) != 0) _ovr.SetOverlayTransform(_pitchIndicatorOverlayHandle, pitchTransform, _trackedDeviceIndex);
                 if (_ovr.FindOverlay(ROLL_INDICATOR_OVERLAY_UNIQUE_KEY) != 0) _ovr.SetOverlayTransform(_rollIndicatorOverlayHandle, rollTransform, _trackedDeviceIndex);
+            } else
+            {
+                _reticleTextureSize = _ovr.GetOverlayTextureSize(_reticleOverlayHandle);
             }
         }
 

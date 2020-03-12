@@ -136,6 +136,9 @@
     <Content Include="resources\pitchindicator.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="resources\reticle.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="resources\rollindicator.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
