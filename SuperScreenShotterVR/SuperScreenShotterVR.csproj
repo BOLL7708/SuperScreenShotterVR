@@ -133,6 +133,7 @@
     <Content Include="openvr_api.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="resources\logo.ico" />
     <Content Include="resources\pitchindicator.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

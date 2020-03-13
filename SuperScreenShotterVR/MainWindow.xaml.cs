@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -29,11 +31,29 @@ namespace SuperScreenShotterVR
     {
         private MainController _controller = new MainController();
         private Properties.Settings _settings = Properties.Settings.Default;
+        private NotifyIcon _notifyIcon;
+        private static Mutex _mutex = null;
+
         public MainWindow()
         {
             InitializeComponent();
-            InitSettings();
+            
+            // Prevent multiple instances running at once
+            const string appName = "SuperScreenShotterVR";
+            _mutex = new Mutex(true, appName, out bool createdNew);
+            if (!createdNew)
+            {
+                System.Windows.MessageBox.Show(
+                System.Windows.Application.Current.MainWindow,
+                "This application is already running!",
+                "SuperScreenShotterVR",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+                );
+                System.Windows.Application.Current.Shutdown();
+            }
 
+            InitSettings();
             _controller.StatusUpdateAction = (status) =>
             {
                 Dispatcher.Invoke(() =>
@@ -52,6 +72,36 @@ namespace SuperScreenShotterVR
                 });
             };
             _controller.Init();
+
+            var icon = Properties.Resources.app_logo as System.Drawing.Icon;
+            _notifyIcon = new System.Windows.Forms.NotifyIcon();
+            _notifyIcon.Click += NotifyIcon_Click;
+            _notifyIcon.Icon = icon;
+            _notifyIcon.Visible = true;
+        }
+
+        // Restore window
+        private void NotifyIcon_Click(object sender, EventArgs e)
+        {
+            WindowState = WindowState.Normal;
+            Activate();
+        }
+
+        // Not doing this will leave the icon after app closure
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            _notifyIcon.Dispose();
+            base.OnClosing(e);
+        }
+
+        // Need to add this event to the window object
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            switch (WindowState)
+            {
+                case WindowState.Minimized: ShowInTaskbar = false; break;
+                default: ShowInTaskbar = true; break;
+            }
         }
 
         private void InitSettings()
@@ -177,10 +227,10 @@ namespace SuperScreenShotterVR
             {
                 _controller.UpdateScreenshotHook();
             } else {
-                var result = MessageBox.Show("You need to restart this application to restore original screenshot functionality, do it now?", "SuperScreenShotterVR", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
+                var result = System.Windows.MessageBox.Show("You need to restart this application to restore original screenshot functionality, do it now?", "SuperScreenShotterVR", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
                 if(result == MessageBoxResult.Yes)
                 {
-                    Application.Current.Shutdown();
+                    System.Windows.Application.Current.Shutdown();
                     // TODO: Should also relaunch it.
                 }
             }
