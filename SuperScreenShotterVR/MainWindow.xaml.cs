@@ -78,6 +78,13 @@ namespace SuperScreenShotterVR
             _notifyIcon.Click += NotifyIcon_Click;
             _notifyIcon.Icon = icon;
             _notifyIcon.Visible = true;
+
+            if(_settings.LaunchMinimized)
+            {
+                Hide();
+                WindowState = WindowState.Minimized;
+                ShowInTaskbar = !_settings.Tray;
+            }
         }
 
         // Restore window
@@ -85,6 +92,7 @@ namespace SuperScreenShotterVR
         {
             WindowState = WindowState.Normal;
             Activate();
+            Show();
         }
 
         // Not doing this will leave the icon after app closure
@@ -99,8 +107,8 @@ namespace SuperScreenShotterVR
         {
             switch (WindowState)
             {
-                case WindowState.Minimized: ShowInTaskbar = false; break;
-                default: ShowInTaskbar = true; break;
+                case WindowState.Minimized: ShowInTaskbar = !_settings.Tray; break;
+                default: ShowInTaskbar = true; Show(); break;
             }
         }
 
