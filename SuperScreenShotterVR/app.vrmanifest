@@ -9,7 +9,7 @@
 		"strings": {
 			"en_us": {
 				"name": "SuperScreenShotterVR",
-				"description": "Take super high resolution screenshots."
+				"description": "Extends the screenshot functionality of SteamVR"
 			}
 		}
 	}]

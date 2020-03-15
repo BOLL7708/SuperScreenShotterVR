@@ -24,7 +24,7 @@ namespace SuperScreenShotterVR
         private bool _isHookedForScreenshots = false;
         private string _currentAppId = "";
         private ulong _notificationOverlayHandle = 0;
-        private Dictionary<uint, ScreenshotResult> _screenshotQueue = new Dictionary<uint, ScreenshotResult>();
+        private Dictionary<uint, ScreenshotData> _screenshotQueue = new Dictionary<uint, ScreenshotData>();
         private bool _shouldShutDown = false;
         private MediaPlayer _mediaPlayer;
         private Thread _workerThread;
@@ -41,6 +41,9 @@ namespace SuperScreenShotterVR
         private uint _trackedDeviceIndex = 0;
         private float _overlayWidth = 0;
         private OverlayTextureSize _reticleTextureSize = new OverlayTextureSize();
+        private float _originalSuperSampling = 1f;
+        private bool _originalSuperSamplingEnabled = false;
+        private float _displayFrequency = 90f;
 
         // Actions
         public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
@@ -61,7 +64,7 @@ namespace SuperScreenShotterVR
             Thread.CurrentThread.IsBackground = true;
             while (true)
             {
-                Thread.Sleep(1000/120); // TODO: Detect headset frame-rate changes?
+                Thread.Sleep(1000/(int)_displayFrequency);
                 if (!_ovr.IsInitialized())
                 {
                     _ovr.SetDebugLogAction((message) => {
@@ -75,19 +78,24 @@ namespace SuperScreenShotterVR
                 {
                     if (!_initComplete)
                     {
+                        _initComplete = true;
+
                         // Screenshots
                         UpdateScreenshotHook();
                         PlayScreenshotSound(true);
                         _currentAppId = _ovr.GetRunningApplicationId();
                         AppUpdateAction.Invoke(_currentAppId);
                         ToggleViewfinder(true); // DEBUG
+                        UpdateSuperSamplingValues();
+                        UpdateTrackedDeviceIndex();
+                        UpdateDisplayFrequency();
+
+                        // App
+                        _ovr.LoadAppManifest("./app.vrmanifest");
 
                         // Input
-                        _ovr.LoadAppManifest("./app.vrmanifest");
                         _ovr.LoadActionManifest("./actions.json");
                         _ovr.RegisterActionSet("/actions/screenshots");
-
-                        UpdateTrackedDeviceIndex();
 
                         // TODO: After restart these do not get registered again??!!??
                         _ovr.RegisterDigitalAction(
@@ -104,7 +112,6 @@ namespace SuperScreenShotterVR
                         // Events
                         _ovr.RegisterEvent(EVREventType.VREvent_RequestScreenshot, (data) => { 
                             Debug.WriteLine("OBS! Screenshot request.");
-
                             // This happens after running TakeScreenshot() with no application running
                             // It leaves us with an error akin to ScreenshotAlreadyInProgress until
                             // we submit an empty result to Steam, we do that in ScreenShotTriggered().
@@ -118,6 +125,7 @@ namespace SuperScreenShotterVR
                             ScreenShotTaken(data.data);
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotFailed, (data) => {
+                            _screenshotQueue.Remove(data.data.screenshot.handle);
                             Debug.WriteLine("Screenshot failed");
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotProgressToDashboard, (data) => {
@@ -128,7 +136,9 @@ namespace SuperScreenShotterVR
                             AppUpdateAction.Invoke(_currentAppId);
                             _isHookedForScreenshots = false; // To enable rehooking
                             UpdateScreenshotHook(); // Hook at new application as it seems to occasionally get dropped
-                            UpdateOutputFolder();                           
+                            UpdateOutputFolder();
+                            UpdateSuperSamplingValues();
+                            _screenshotQueue.Clear(); // To not have left-overs
                             Debug.WriteLine($"New application running: {_currentAppId}");
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_QuitAcknowledged, (data) =>
@@ -140,8 +150,12 @@ namespace SuperScreenShotterVR
                         {
                             UpdateTrackedDeviceIndex();
                         });
-
-                        _initComplete = true;
+                        _ovr.RegisterEvent(EVREventType.VREvent_SteamVRSectionSettingChanged, (data) =>
+                        {
+                            // This is triggered when someone changes their headset display frequency in SteamVR
+                            // (as well as other settings)
+                            UpdateDisplayFrequency();
+                        });
                         Debug.WriteLine("Init complete.");
                     }
                     else
@@ -155,8 +169,7 @@ namespace SuperScreenShotterVR
                             if(_stopWatch.Elapsed.TotalSeconds >= _settings.TimerSeconds)
                             {
                                 Debug.WriteLine("Timer triggered!");
-                                // TODO: Capture screenshots without pushing notification? In that case, save separate list with handles?
-                                ScreenshotTriggered();
+                                ScreenshotTriggered(false);
                                 _stopWatch.Restart();
                             }
                         } else if(_stopWatch.IsRunning)
@@ -170,6 +183,17 @@ namespace SuperScreenShotterVR
                     }
                 }
             }
+        }
+
+        private void UpdateDisplayFrequency()
+        {
+            _displayFrequency = _ovr.GetFloatTrackedDeviceProperty(_trackedDeviceIndex, ETrackedDeviceProperty.Prop_DisplayFrequency_Float);
+        }
+
+        private void UpdateSuperSamplingValues()
+        {
+            _originalSuperSampling = _ovr.GetSuperSamplingForCurrentApp();
+            _originalSuperSamplingEnabled = _ovr.GetSuperSamplingEnabledForCurrentApp();
         }
 
         private void UpdateTrackedDeviceIndex()
@@ -287,21 +311,6 @@ namespace SuperScreenShotterVR
             }
         }
 
-        private float originalScale = 1;
-
-        private void TakeScreenshot()
-        {
-            Debug.WriteLine("Taking screenshot!");
-            originalScale = _ovr.GetRenderTargetForCurrentApp();
-            _ovr.SetRenderScaleForCurrentApp(5f); // Clamped to 500%
-            Thread.Sleep(100); // Needs at least 50ms to change render scale before taking screenshot
-            var id = _ovr.GetRunningApplicationId();
-            if (id != string.Empty) id = id.Split('.').Last();
-            // _ovr.TakeScreenshot(id);
-            _ovr.SetRenderScaleForCurrentApp(originalScale);
-            Debug.WriteLine($"Screenshot taken! Original scale: {originalScale}");
-        }
-
         private void PlayScreenshotSound(bool onlyLoad = false)
         {
             if(_mediaPlayer == null) _mediaPlayer = new MediaPlayer();
@@ -320,15 +329,39 @@ namespace SuperScreenShotterVR
             }
         }
 
-        private void ScreenshotTriggered()
+        private class ScreenshotData {
+            public ScreenshotResult result;
+            public bool superSampled;
+            public bool showNotification;
+        }
+
+
+        private void ScreenshotTriggered(bool byUser=true)
         {
-            if(_currentAppId != string.Empty) // There needs to be a running application
+            if(_settings.SuperSampling) // TODO: Explore if delay is really needed.
+            {
+                if(_screenshotQueue.Count() > 0)
+                {
+                    Debug.WriteLine("Cannot rapidly take screenshots when super sampling.");
+                    return;
+                }
+                Debug.WriteLine("Enabled super sampling 500%!");               
+                if (!_originalSuperSamplingEnabled) _ovr.SetSuperSamplingEnabledForCurrentApp(true);
+                _ovr.SetSuperSamplingForCurrentApp(5f); // Clamped to 500% by SteamVR
+                Thread.Sleep(100); // Needs at least 50ms to change render scale before taking screenshot
+
+                var result = _ovr.GetRenderTargetForCurrentApp();
+                Debug.WriteLine($"Super sampling setting result: {result}");
+            }
+            
+            if (_currentAppId != string.Empty) // There needs to be a running application
             {
                 Debug.WriteLine("Taking screenshot!");
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 UpdateOutputFolder(true); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture
-                if (result != null) _screenshotQueue.Add(result.handle, result);
+                var data = new ScreenshotData {result=result, superSampled=_settings.SuperSampling, showNotification=byUser };
+                if (result != null) _screenshotQueue.Add(result.handle, data);
                 if (success)
                 {
                     if (_settings.Audio) PlayScreenshotSound(); // Sound effect
@@ -341,12 +374,14 @@ namespace SuperScreenShotterVR
             } else Debug.WriteLine("No application is running");
         }
 
-        private void ScreenShotTaken(VREvent_Data_t data)
+        private void ScreenShotTaken(VREvent_Data_t eventData)
         {
+            var handle = eventData.screenshot.handle;
             var notificationBitmap = new NotificationBitmap_t();
-            if (_screenshotQueue.ContainsKey(data.screenshot.handle))
+            if (_screenshotQueue.ContainsKey(handle))
             {
-                ScreenshotResult result = _screenshotQueue[data.screenshot.handle];
+                var data = _screenshotQueue[handle];
+                var result = data.result;
                 var filePath = $"{result.filePath}.png";
                 if(File.Exists(filePath))
                 {
@@ -367,16 +402,27 @@ namespace SuperScreenShotterVR
                 {
                     Debug.WriteLine($"Could not find screenshot after taking it: {filePath}");
                 }
-                _screenshotQueue.Remove(data.screenshot.handle);
+                if (_settings.Notifications && data.showNotification)
+                {
+                    _ovr.EnqueueNotification(_notificationOverlayHandle, "Screenshot taken!", notificationBitmap);
+                }
+                if (data.superSampled)
+                {
+                    Thread.Sleep(100); // To allow capture to actually finish before reverting SS
+                    _ovr.SetSuperSamplingForCurrentApp(_originalSuperSampling);
+                    _ovr.SetSuperSamplingEnabledForCurrentApp(_originalSuperSamplingEnabled);
+                    Debug.WriteLine("Disabled super sampling");
+                }
+                _screenshotQueue.Remove(handle);
             } else
             {
-                Debug.WriteLine($"Screenshot handle does not exist in queue? Handle: {data.screenshot.handle}");
+                if (_settings.Notifications)
+                {
+                    _ovr.EnqueueNotification(_notificationOverlayHandle, "Screenshot taken! (Unknown)", notificationBitmap);
+                }
+                Debug.WriteLine($"Screenshot handle does not exist in queue? Handle: {handle}");
             }
-            if(_settings.Notifications)
-            {
-                _ovr.EnqueueNotification(_notificationOverlayHandle, "Screenshot taken!", notificationBitmap);
-            }
-            Debug.WriteLine($"Screenshot taken done, handle: {data.screenshot.handle}");
+            Debug.WriteLine($"Screenshot taken done, handle: {eventData.screenshot.handle}");
         }
 
         // https://stackoverflow.com/a/24199315

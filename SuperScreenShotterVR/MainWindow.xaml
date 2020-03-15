@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuperScreenShotterVR"
         mc:Ignorable="d"
-        Title="SuperScreenShotterVR" Height="500" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
+        Title="SuperScreenShotterVR" Height="465" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
     <DockPanel LastChildFill="True">
         <GroupBox Header="Status &amp; Help" DockPanel.Dock="Top" Background="WhiteSmoke" Margin="10">
             <StackPanel Orientation="Vertical">
@@ -42,14 +42,14 @@
         </GroupBox>
         <GroupBox Header="Capture &amp; Output" DockPanel.Dock="Top" Background="LavenderBlush" Margin="10 0 10 10">
             <StackPanel Orientation="Vertical">
-                <CheckBox x:Name="CheckBox_ViewFinder" Margin="5" Content="Show view finder overlay before capture" Checked="CheckBox_ViewFinder_Checked" Unchecked="CheckBox_ViewFinder_Checked"/>
-                <CheckBox Visibility="Collapsed" x:Name="CheckBox_SuperSampling" Margin="5" Content="Attempt super sampling boost for capture" Checked="CheckBox_SuperSampling_Checked" Unchecked="CheckBox_SuperSampling_Checked"/>
+                <CheckBox x:Name="CheckBox_ViewFinder" Margin="5" Content="Show view finder overlay before capture (binding)" Checked="CheckBox_ViewFinder_Checked" Unchecked="CheckBox_ViewFinder_Checked"/>
                 <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
                     <CheckBox x:Name="CheckBox_CaptureTimer" Content="Capture on a timer every: " Checked="CheckBox_CaptureTimer_Checked" Unchecked="CheckBox_CaptureTimer_Checked"/>
                     <TextBox x:Name="TextBox_TimerSeconds" Text="0" LostFocus="TextBox_TimerSeconds_LostFocus"/>
-                    <Label Content=" seconds" Padding="0"/>
+                    <Label Content=" seconds (no notification)" Padding="0"/>
                 </StackPanel>
                 <CheckBox x:Name="CheckBox_SubmitToSteam" Margin="5 0 5 5" Content="Submit screenshots to Steam" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
+                <CheckBox x:Name="CheckBox_SuperSampling" Margin="5 0 5 5" Content="Attempt super sampling boost (experimental)" Checked="CheckBox_SuperSampling_Checked" Unchecked="CheckBox_SuperSampling_Checked"/>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Output root folder:"/>
                     <Button x:Name="Button_BrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
@@ -62,7 +62,7 @@
                 <CheckBox x:Name="CheckBox_Notifications" Margin="5" Content="Display notification on screenshot capture" Checked="CheckBox_Notifications_Checked" Unchecked="CheckBox_Notifications_Checked"/>
                 <CheckBox x:Name="CheckBox_Thumbnail" Margin="5 0 5 5" Content="Display thumbnail of captured screenshot" Checked="CheckBox_Thumbnail_Checked" Unchecked="CheckBox_Thumbnail_Checked"/>
                 <CheckBox x:Name="CheckBox_Audio" Margin="5 0 5 5" Content="Play sound with notification" Checked="CheckBox_Audio_Checked" Unchecked="CheckBox_Audio_Checked"/>
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Visibility="Collapsed">
                     <Label Content="Sound file:"/>
                     <Button x:Name="Button_BrowseAudio" Padding="4" Content="Browse..." Click="Button_BrowseAudio_Click"/>
                     <Label x:Name="Label_CustomAudio" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
