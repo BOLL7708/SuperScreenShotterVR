@@ -44,6 +44,7 @@ namespace SuperScreenShotterVR
         private float _originalSuperSampling = 1f;
         private bool _originalSuperSamplingEnabled = false;
         private float _displayFrequency = 90f;
+        private bool _overlayIsVisible = false;
 
         // Actions
         public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
@@ -177,7 +178,7 @@ namespace SuperScreenShotterVR
                             _stopWatch.Stop();
                         }
 
-                        UpdateOverlays();
+                        if(_overlayIsVisible) UpdateOverlays();
 
                         ShutdownIfWeShould();
                     }
@@ -217,6 +218,7 @@ namespace SuperScreenShotterVR
             _ovr.SetOverlayVisibility(_rollIndicatorOverlayHandle, shouldBeVisible);
             _ovr.SetOverlayVisibility(_pitchIndicatorOverlayHandle, shouldBeVisible);
             _ovr.SetOverlayVisibility(_reticleOverlayHandle, shouldBeVisible);
+            _overlayIsVisible = shouldBeVisible;
         }
 
         private ulong CreateOverlay(string imageFileName, string uniqueKey, string title, bool small=false) {
@@ -252,16 +254,23 @@ namespace SuperScreenShotterVR
                 var hmdTransform = pose.mDeviceToAbsoluteTracking;
                 var YPR = Utils.RotationMatrixToYPR(hmdTransform);
 
+                Debug.WriteLine($"Y: {GetVal(YPR.yaw)}, P: {GetVal(YPR.pitch)}, R: {GetVal(YPR.roll)}");
+
+                string GetVal(double val)
+                {
+                    return ((val *= 100).ToString()+"0000").Substring(0, 5);
+                }
+
                 var pitchYPR = new YPR { yaw = 0, pitch = 0, roll = 0 };
                 var pitchTransform = Utils.GetTransformFromEuler(pitchYPR);
-                var pitchY = (float) -YPR.roll * distance; // Y-pos, somehow this works
+                var pitchY = (float) -YPR.pitch * distance; // Y-pos, somehow this works
                 var limitY = _overlayWidth / 8 / _reticleTextureSize.aspectRatio;
                 if (pitchY > limitY) pitchY = limitY;
                 if (pitchY < -limitY) pitchY = -limitY;
                 pitchTransform.m7 = pitchY;
                 pitchTransform.m11 = -distance;
 
-                var rollYPR = new YPR { yaw = 0, pitch = -YPR.pitch, roll = 0 };
+                var rollYPR = new YPR { yaw = 0, pitch = 0, roll = -YPR.roll };
                 var rollTransform = Utils.GetTransformFromEuler(rollYPR);
                 rollTransform.m11 = -distance;
 
@@ -338,7 +347,7 @@ namespace SuperScreenShotterVR
 
         private void ScreenshotTriggered(bool byUser=true)
         {
-            if(_settings.SuperSampling) // TODO: Explore if delay is really needed.
+            if(_settings.SuperSampling)
             {
                 if(_screenshotQueue.Count() > 0)
                 {
