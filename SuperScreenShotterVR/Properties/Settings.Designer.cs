@@ -97,7 +97,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool Audio {
             get {
                 return ((bool)(this["Audio"]));
@@ -145,7 +145,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool Tray {
             get {
                 return ((bool)(this["Tray"]));
@@ -169,7 +169,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("v0.14")]
+        [global::System.Configuration.DefaultSettingValueAttribute("v0.30")]
         public string Version {
             get {
                 return ((string)(this["Version"]));
@@ -181,7 +181,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool ViewFinder {
             get {
                 return ((bool)(this["ViewFinder"]));
@@ -193,7 +193,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
         public int OverlayDistance {
             get {
                 return ((int)(this["OverlayDistance"]));
