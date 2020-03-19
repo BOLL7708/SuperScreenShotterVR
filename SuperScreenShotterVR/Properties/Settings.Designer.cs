@@ -194,12 +194,24 @@ namespace SuperScreenShotterVR.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("5")]
-        public int OverlayDistance {
+        public float OverlayDistance {
             get {
-                return ((int)(this["OverlayDistance"]));
+                return ((float)(this["OverlayDistance"]));
             }
             set {
                 this["OverlayDistance"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public float OverlayOpacity {
+            get {
+                return ((float)(this["OverlayOpacity"]));
+            }
+            set {
+                this["OverlayOpacity"] = value;
             }
         }
     }

@@ -44,8 +44,11 @@
     <Setting Name="ViewFinder" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="OverlayDistance" Type="System.Int32" Scope="User">
+    <Setting Name="OverlayDistance" Type="System.Single" Scope="User">
       <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="OverlayOpacity" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

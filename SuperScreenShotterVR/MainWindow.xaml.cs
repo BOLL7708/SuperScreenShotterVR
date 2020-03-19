@@ -33,6 +33,7 @@ namespace SuperScreenShotterVR
         private Properties.Settings _settings = Properties.Settings.Default;
         private NotifyIcon _notifyIcon;
         private static Mutex _mutex = null;
+        private bool _settingsLoaded = false;
 
         public MainWindow()
         {
@@ -71,6 +72,16 @@ namespace SuperScreenShotterVR
                     Label_AppId.Background = appIdFixed != string.Empty ? System.Windows.Media.Brushes.OliveDrab : System.Windows.Media.Brushes.Gray;
                 });
             };
+            _controller.SetDebugLogAction((message) => {
+                Dispatcher.Invoke(()=>{
+                    var time = DateTime.Now.ToString("HH:mm:ss");
+                    var oldLog = TextBox_Log.Text;
+                    var lines = oldLog.Split('\n');
+                    Array.Resize(ref lines, 3);
+                    var newLog = string.Join("\n", lines);
+                    TextBox_Log.Text = $"{time}: {message}\n{newLog}";
+                });
+            });
             _controller.Init();
 
             var icon = Properties.Resources.app_logo as System.Drawing.Icon;
@@ -146,6 +157,10 @@ namespace SuperScreenShotterVR
             CheckBox_ReplaceShortcut.IsChecked = _settings.ReplaceShortcut;
             CheckBox_LaunchMinimized.IsChecked = _settings.LaunchMinimized;
             CheckBox_Tray.IsChecked = _settings.Tray;
+
+            Slider_OverlayDistance.Value = _settings.OverlayDistance;
+            Slider_OverlayOpacity.Value = _settings.OverlayOpacity;
+            _settingsLoaded = true;
         }
 
         private bool CheckboxValue(RoutedEventArgs e)
@@ -214,8 +229,10 @@ namespace SuperScreenShotterVR
 
         private void Button_BrowseAudio_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new System.Windows.Forms.OpenFileDialog();
-            dialog.Filter = "Waveform Audio File|*.wav";
+            var dialog = new System.Windows.Forms.OpenFileDialog
+            {
+                Filter = "Waveform Audio File|*.wav"
+            };
             System.Windows.Forms.DialogResult result = dialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
@@ -268,6 +285,31 @@ namespace SuperScreenShotterVR
             _settings.TimerSeconds = result;
             TextBox_TimerSeconds.Text = result.ToString();
             _settings.Save();
+        }
+
+        private void Slider_OverlayDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            var value = Math.Pow(e.NewValue, 2)/100;
+            string valueStr;
+            if (value < 2) valueStr = string.Format("{0:0.00}", value);
+            else if (value < 10) valueStr = string.Format("{0:0.0}", value);
+            else valueStr = string.Format("{0:0}", value);
+            Label_OverlayDistance.Content = $"{valueStr}m";
+            if(_settingsLoaded)
+            {
+                _settings.OverlayDistance = (float) value;
+                _settings.Save();
+            }
+        }
+
+        private void Slider_OverlayOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Label_OverlayOpacity.Content = $"{Math.Round(e.NewValue)}%";
+            if(_settingsLoaded)
+            {
+                _settings.OverlayOpacity = (float)e.NewValue;
+                _settings.Save();
+            }
         }
     }
 }
