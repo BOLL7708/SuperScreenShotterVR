@@ -39,16 +39,19 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Version" Type="System.String" Scope="User">
-      <Value Profile="(Default)">v0.30</Value>
+      <Value Profile="(Default)">v0.32</Value>
     </Setting>
     <Setting Name="ViewFinder" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="OverlayDistance" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">5</Value>
+      <Value Profile="(Default)">3</Value>
     </Setting>
     <Setting Name="OverlayOpacity" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="OverlayDistanceGui" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">31.0723248</Value>
     </Setting>
   </Settings>
 </SettingsFile>

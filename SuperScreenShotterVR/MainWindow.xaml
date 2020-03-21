@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuperScreenShotterVR"
         mc:Ignorable="d"
-        Title="SuperScreenShotterVR" Height="575" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
+        Title="SuperScreenShotterVR" Height="585" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
     <ScrollViewer>
 
         <StackPanel Orientation="Vertical">
@@ -78,7 +78,7 @@
                     <DockPanel LastChildFill="True">
                         <Label Content="Distance: " Padding="5 5 0 5"/>
                         <Label x:Name="Label_OverlayDistance" Content="100m" Padding="0 5 5 5" MinWidth="40"/>
-                        <Slider x:Name="Slider_OverlayDistance" Maximum="100" Minimum="10" ValueChanged="Slider_OverlayDistance_ValueChanged"/>
+                        <Slider x:Name="Slider_OverlayDistance" Maximum="100" Minimum="17.1" ValueChanged="Slider_OverlayDistance_ValueChanged"/>
                     </DockPanel>
                     <DockPanel LastChildFill="True">
                         <Label Content="Opacity: " Padding="5 5 0 5"/>

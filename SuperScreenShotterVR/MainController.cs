@@ -88,7 +88,7 @@ namespace SuperScreenShotterVR
                         PlayScreenshotSound(true);
                         _currentAppId = _ovr.GetRunningApplicationId();
                         AppUpdateAction.Invoke(_currentAppId);
-                        ToggleViewfinder(true); // DEBUG
+                        // ToggleViewfinder(true); // DEBUG
                         UpdateSuperSamplingValues();
                         UpdateTrackedDeviceIndex();
                         UpdateDisplayFrequency();
@@ -424,10 +424,10 @@ namespace SuperScreenShotterVR
                         var image = Image.FromFile(filePath);
                         var bitmap = ResizeImage(image, 256, 256);
                         SetAlpha(ref bitmap, 255);
-                        notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap, true);
+                        notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap);
                     } else
                     {
-                        notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(Properties.Resources.logo, true);
+                        notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(Properties.Resources.logo);
                     }
                 } else
                 {

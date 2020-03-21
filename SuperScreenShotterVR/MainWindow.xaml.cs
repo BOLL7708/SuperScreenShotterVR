@@ -158,7 +158,7 @@ namespace SuperScreenShotterVR
             CheckBox_LaunchMinimized.IsChecked = _settings.LaunchMinimized;
             CheckBox_Tray.IsChecked = _settings.Tray;
 
-            Slider_OverlayDistance.Value = _settings.OverlayDistance;
+            Slider_OverlayDistance.Value = _settings.OverlayDistanceGui;
             Slider_OverlayOpacity.Value = _settings.OverlayOpacity;
             _settingsLoaded = true;
         }
@@ -289,7 +289,7 @@ namespace SuperScreenShotterVR
 
         private void Slider_OverlayDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            var value = Math.Pow(e.NewValue, 2)/100;
+            var value = Math.Pow(e.NewValue, 3)/10000;
             string valueStr;
             if (value < 2) valueStr = string.Format("{0:0.00}", value);
             else if (value < 10) valueStr = string.Format("{0:0.0}", value);
@@ -297,6 +297,7 @@ namespace SuperScreenShotterVR
             Label_OverlayDistance.Content = $"{valueStr}m";
             if(_settingsLoaded)
             {
+                _settings.OverlayDistanceGui = (float) e.NewValue;
                 _settings.OverlayDistance = (float) value;
                 _settings.Save();
             }

@@ -169,7 +169,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("v0.30")]
+        [global::System.Configuration.DefaultSettingValueAttribute("v0.32")]
         public string Version {
             get {
                 return ((string)(this["Version"]));
@@ -193,7 +193,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
         public float OverlayDistance {
             get {
                 return ((float)(this["OverlayDistance"]));
@@ -205,13 +205,25 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
         public float OverlayOpacity {
             get {
                 return ((float)(this["OverlayOpacity"]));
             }
             set {
                 this["OverlayOpacity"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("31.0723248")]
+        public float OverlayDistanceGui {
+            get {
+                return ((float)(this["OverlayDistanceGui"]));
+            }
+            set {
+                this["OverlayDistanceGui"] = value;
             }
         }
     }
