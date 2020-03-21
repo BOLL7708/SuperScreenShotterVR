@@ -7,9 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using Valve.VR;
 using static BOLL7708.EasyOpenVRSingleton;
@@ -171,7 +169,6 @@ namespace SuperScreenShotterVR
                             if (!_stopWatch.IsRunning) _stopWatch.Start();
                             if(_stopWatch.Elapsed.TotalSeconds >= _settings.TimerSeconds)
                             {
-                                Debug.WriteLine("Timer triggered!");
                                 ScreenshotTriggered(false);
                                 _stopWatch.Restart();
                             }
@@ -208,15 +205,21 @@ namespace SuperScreenShotterVR
 
         private void ToggleViewfinder(bool visible)
         {
+            // TODO: Consider disabling viewfinder as long as screenshot is being taken to avoid the post-capture flicker
+            // TODO: Test this locally before pushing it live
+            // TODO: Also create them without looking for them the first time to avoid errors in the log.
+
             _viewfinderOverlayHandle = _ovr.FindOverlay(VIEWFINDER_OVERLAY_UNIQUE_KEY);
             _rollIndicatorOverlayHandle = _ovr.FindOverlay(ROLL_INDICATOR_OVERLAY_UNIQUE_KEY);
             _pitchIndicatorOverlayHandle = _ovr.FindOverlay(PITCH_INDICATOR_OVERLAY_UNIQUE_KEY);
             _reticleOverlayHandle = _ovr.FindOverlay(RETICLE_OVERLAY_UNIQUE_KEY);
+
             if (_viewfinderOverlayHandle == 0) _viewfinderOverlayHandle = CreateOverlay("viewfinder", VIEWFINDER_OVERLAY_UNIQUE_KEY, "SSSVRVF");
-            if(_rollIndicatorOverlayHandle == 0) _rollIndicatorOverlayHandle = CreateOverlay("rollindicator", ROLL_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRRI", true);
-            if(_pitchIndicatorOverlayHandle == 0) _pitchIndicatorOverlayHandle = CreateOverlay("pitchindicator", PITCH_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRPI", true);
-            if (_reticleOverlayHandle == 0) _reticleOverlayHandle = CreateOverlay("reticle", RETICLE_OVERLAY_UNIQUE_KEY, "SSSVRR", true);
+            if(_rollIndicatorOverlayHandle == 0) _rollIndicatorOverlayHandle = CreateOverlay("rollindicator", ROLL_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRRI");
+            if(_pitchIndicatorOverlayHandle == 0) _pitchIndicatorOverlayHandle = CreateOverlay("pitchindicator", PITCH_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRPI");
+            if (_reticleOverlayHandle == 0) _reticleOverlayHandle = CreateOverlay("reticle", RETICLE_OVERLAY_UNIQUE_KEY, "SSSVRR");
             UpdateOverlays();
+
             var shouldBeVisible = visible && _settings.ViewFinder;
             _ovr.SetOverlayVisibility(_viewfinderOverlayHandle, shouldBeVisible);
             _ovr.SetOverlayVisibility(_rollIndicatorOverlayHandle, shouldBeVisible);
@@ -225,8 +228,8 @@ namespace SuperScreenShotterVR
             _overlayIsVisible = shouldBeVisible;
         }
 
-        private ulong CreateOverlay(string imageFileName, string uniqueKey, string title, bool small=false) {
-            // Instantiate overlay, widyth and transform is set in UpdateOverlays()
+        private ulong CreateOverlay(string imageFileName, string uniqueKey, string title) {
+            // Instantiate overlay, width and transform is set in UpdateOverlays()
             ulong handle = _ovr.CreateOverlay(uniqueKey, title, Utils.GetEmptyTransform(), 1, _trackedDeviceIndex);
 
             // Apply texture
@@ -373,18 +376,14 @@ namespace SuperScreenShotterVR
                     Debug.WriteLine("Cannot rapidly take screenshots when super sampling.");
                     return;
                 }
-                Debug.WriteLine("Enabled super sampling 500%!");               
+                
                 if (!_originalSuperSamplingEnabled) _ovr.SetSuperSamplingEnabledForCurrentApp(true);
                 _ovr.SetSuperSamplingForCurrentApp(5f); // Clamped to 500% by SteamVR
                 Thread.Sleep(100); // Needs at least 50ms to change render scale before taking screenshot
-
-                var result = _ovr.GetRenderTargetForCurrentApp();
-                Debug.WriteLine($"Super sampling setting result: {result}");
             }
             
             if (_currentAppId != string.Empty) // There needs to be a running application
             {
-                Debug.WriteLine("Taking screenshot!");
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 UpdateOutputFolder(true); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture
@@ -442,7 +441,6 @@ namespace SuperScreenShotterVR
                     Thread.Sleep(100); // To allow capture to actually finish before reverting SS
                     _ovr.SetSuperSamplingForCurrentApp(_originalSuperSampling);
                     _ovr.SetSuperSamplingEnabledForCurrentApp(_originalSuperSamplingEnabled);
-                    Debug.WriteLine("Disabled super sampling");
                 }
                 _screenshotQueue.Remove(handle);
             } else

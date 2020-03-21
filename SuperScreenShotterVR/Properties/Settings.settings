@@ -39,7 +39,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Version" Type="System.String" Scope="User">
-      <Value Profile="(Default)">v0.32</Value>
+      <Value Profile="(Default)">v0.33</Value>
     </Setting>
     <Setting Name="ViewFinder" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

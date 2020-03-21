@@ -169,7 +169,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("v0.32")]
+        [global::System.Configuration.DefaultSettingValueAttribute("v0.33")]
         public string Version {
             get {
                 return ((string)(this["Version"]));
