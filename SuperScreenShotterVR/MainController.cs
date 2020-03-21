@@ -419,12 +419,15 @@ namespace SuperScreenShotterVR
                         Debug.WriteLine($"Managed to submit the screenshot to Steam: {submitted}");
                     } else Debug.WriteLine("Will not submit the screenshot to Steam.");
 
-                    if(_settings.Notifications && _settings.Thumbnail)
+                    if (_settings.Notifications && _settings.Thumbnail)
                     {
                         var image = Image.FromFile(filePath);
                         var bitmap = ResizeImage(image, 256, 256);
                         SetAlpha(ref bitmap, 255);
                         notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap, true);
+                    } else
+                    {
+                        notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(Properties.Resources.logo, true);
                     }
                 } else
                 {
