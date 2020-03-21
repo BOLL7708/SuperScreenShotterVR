@@ -102,8 +102,9 @@ namespace SuperScreenShotterVR
         private void NotifyIcon_Click(object sender, EventArgs e)
         {
             WindowState = WindowState.Normal;
-            Activate();
+            ShowInTaskbar = true;
             Show();
+            Activate();           
         }
 
         // Not doing this will leave the icon after app closure
