@@ -1,24 +1,24 @@
 # SuperScreenShotterVR
-Extends SteamVR screenshot functionality
+Extends SteamVR screenshot functionality, download the latest release [here](https://github.com/BOLL7708/SuperScreenShotterVR/releases).
 
 ## Description
-This application can do any or all of the following: use custom screenshots output folder, save uncompressed .PNG files, use the same screenshot chord as SteamVR, display the result in a notification, display a helpful viewfinder. Things to note are below.
+This application can do any or all of the following: use custom output folder, save uncompressed .PNG files, use the same screenshot chord as SteamVR, display the result in a notification, display a helpful viewfinder. Things to note are listed below.
 
 ![Application Window](https://i.imgur.com/t5EobC8.png)
 
 ## Output folder
-If not chosen, it will be the folder the application is in. Screenshots are automatically put into subfolders based on the app ID.
+If not specifically set it will default to the application folder it is running in. Screenshots are automatically put into subfolders based on the current app ID from SteamVR.
 
 ## Submit to Steam
-This will submit the screenshot to Steam so it gets included in the screenshot library for the running title in the desktop client. One caveat right now is that this will cause the default screenshot notification to be shown, regardless of settings in this application.
+This will submit the screenshot to Steam so it gets included in the screenshot library for the running title in the desktop client. One caveat right now is that this will cause the default screenshot notification to be shown regardless of settings in this application.
 
 ## Notifications and audio
-You can choose to get a notification on capture, for it to contain a thumbnail of the result, and to play back an audio file.
+On capture you can choose to get a notification, if it should include a thumbnail of the result, and to play back an audio file.
 
 ![Notification with thumbnail](https://i.imgur.com/bzhFmbJ.png)
 
 ## Viewfinder
-This is an overlay that is shown on a specific input, the app only comes with Index bindings as that is what it was developed on, but you can bind the actions to any controller using the SteamVR input binding interface.
+This is an overlay that is shown when a specific input is triggered, the app only comes with Index bindings as that is what it was developed on, but you can bind the action to any controller using the SteamVR input binding interface. The default binding for Index is: system button touch + trigger push.
 
 ![Viewfinder](https://i.imgur.com/yLfqear.jpg)
 
