@@ -265,7 +265,8 @@ namespace SuperScreenShotterVR
                 var pitchYPR = new YPR { yaw = 0, pitch = 0, roll = 0 };
                 var pitchTransform = Utils.GetTransformFromEuler(pitchYPR);
                 var pitchY = (float) -YPR.pitch * distance; // Y-pos, somehow this works
-                var limitY = width / 8 / _reticleTextureSize.aspectRatio;
+                var reticleSizeFactor = _settings.ReticleSize / 100;
+                var limitY = width * reticleSizeFactor / 2 / _reticleTextureSize.aspectRatio;
                 if (pitchY > limitY) pitchY = limitY;
                 if (pitchY < -limitY) pitchY = -limitY;
                 pitchTransform.m7 = pitchY;
@@ -285,19 +286,19 @@ namespace SuperScreenShotterVR
                 }
                 if (_ovr.FindOverlay(RETICLE_OVERLAY_UNIQUE_KEY) != 0)
                 {
-                    _ovr.SetOverlayWidth(_reticleOverlayHandle, width / 4f);
+                    _ovr.SetOverlayWidth(_reticleOverlayHandle, width * reticleSizeFactor);
                     _ovr.SetOverlayTransform(_reticleOverlayHandle, overlayTransform, _trackedDeviceIndex);
                     _ovr.SetOverlayAlpha(_reticleOverlayHandle, alpha);
                 }
                 if (_ovr.FindOverlay(PITCH_INDICATOR_OVERLAY_UNIQUE_KEY) != 0)
                 {
-                    _ovr.SetOverlayWidth(_pitchIndicatorOverlayHandle, width / 4f);
+                    _ovr.SetOverlayWidth(_pitchIndicatorOverlayHandle, width * reticleSizeFactor);
                     _ovr.SetOverlayTransform(_pitchIndicatorOverlayHandle, pitchTransform, _trackedDeviceIndex);
                     _ovr.SetOverlayAlpha(_pitchIndicatorOverlayHandle, alpha);
                 }
                 if (_ovr.FindOverlay(ROLL_INDICATOR_OVERLAY_UNIQUE_KEY) != 0)
                 {
-                    _ovr.SetOverlayWidth(_rollIndicatorOverlayHandle, width / 4f);
+                    _ovr.SetOverlayWidth(_rollIndicatorOverlayHandle, width * reticleSizeFactor);
                     _ovr.SetOverlayTransform(_rollIndicatorOverlayHandle, rollTransform, _trackedDeviceIndex);
                     _ovr.SetOverlayAlpha(_rollIndicatorOverlayHandle, alpha);
                 }

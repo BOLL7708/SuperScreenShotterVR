@@ -162,6 +162,7 @@ namespace SuperScreenShotterVR
 
             Slider_OverlayDistance.Value = _settings.OverlayDistanceGui;
             Slider_OverlayOpacity.Value = _settings.OverlayOpacity;
+            Slider_ReticleSize.Value = _settings.ReticleSize;
             _settingsLoaded = true;
         }
 
@@ -311,6 +312,16 @@ namespace SuperScreenShotterVR
             if(_settingsLoaded)
             {
                 _settings.OverlayOpacity = (float)e.NewValue;
+                _settings.Save();
+            }
+        }
+
+        private void Slider_ReticleSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Label_ReticleSize.Content = $"{Math.Round(e.NewValue)}%";
+            if (_settingsLoaded)
+            {
+                _settings.ReticleSize = (float)e.NewValue;
                 _settings.Save();
             }
         }

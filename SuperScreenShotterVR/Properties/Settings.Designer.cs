@@ -169,7 +169,7 @@ namespace SuperScreenShotterVR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("v0.33")]
+        [global::System.Configuration.DefaultSettingValueAttribute("v0.36")]
         public string Version {
             get {
                 return ((string)(this["Version"]));
@@ -224,6 +224,18 @@ namespace SuperScreenShotterVR.Properties {
             }
             set {
                 this["OverlayDistanceGui"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
+        public float ReticleSize {
+            get {
+                return ((float)(this["ReticleSize"]));
+            }
+            set {
+                this["ReticleSize"] = value;
             }
         }
     }
