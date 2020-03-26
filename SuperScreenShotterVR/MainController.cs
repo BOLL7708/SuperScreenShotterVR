@@ -18,16 +18,18 @@ namespace SuperScreenShotterVR
     {
         private Properties.Settings _settings = Properties.Settings.Default;
         private EasyOpenVRSingleton _ovr = EasyOpenVRSingleton.Instance;
+        private Thread _workerThread;
         private bool _initComplete = false;
         private bool _isHookedForScreenshots = false;
         private string _currentAppId = "";
         private ulong _notificationOverlayHandle = 0;
         private Dictionary<uint, ScreenshotData> _screenshotQueue = new Dictionary<uint, ScreenshotData>();
+        private uint _lastScreenshotHandle = 0;
         private bool _shouldShutDown = false;
         private MediaPlayer _mediaPlayer;
-        private Thread _workerThread;
         private string _currentAudio = string.Empty;
         private Stopwatch _stopWatch = new Stopwatch();
+
         private const string VIEWFINDER_OVERLAY_UNIQUE_KEY = "boll7708.superscreenshottervr.overlay.viewfinder";
         private const string ROLL_INDICATOR_OVERLAY_UNIQUE_KEY = "boll7708.superscreenshottervr.overlay.rollindicator";
         private const string PITCH_INDICATOR_OVERLAY_UNIQUE_KEY = "boll7708.superscreenshottervr.overlay.pitchindicator";
@@ -36,6 +38,7 @@ namespace SuperScreenShotterVR
         private ulong _rollIndicatorOverlayHandle = 0;
         private ulong _pitchIndicatorOverlayHandle = 0;
         private ulong _reticleOverlayHandle = 0;
+
         private uint _trackedDeviceIndex = 0;
         private OverlayTextureSize _reticleTextureSize = new OverlayTextureSize();
         private float _originalSuperSampling = 1f;
@@ -220,7 +223,7 @@ namespace SuperScreenShotterVR
             if (_reticleOverlayHandle == 0) _reticleOverlayHandle = CreateOverlay("reticle", RETICLE_OVERLAY_UNIQUE_KEY, "SSSVRR");
             UpdateOverlays();
 
-            var shouldBeVisible = visible && _settings.ViewFinder;
+            var shouldBeVisible = visible && _settings.ViewFinder && !_screenshotQueue.ContainsKey(_lastScreenshotHandle);
             _ovr.SetOverlayVisibility(_viewfinderOverlayHandle, shouldBeVisible);
             _ovr.SetOverlayVisibility(_rollIndicatorOverlayHandle, shouldBeVisible);
             _ovr.SetOverlayVisibility(_pitchIndicatorOverlayHandle, shouldBeVisible);
@@ -388,7 +391,11 @@ namespace SuperScreenShotterVR
                 UpdateOutputFolder(true); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture
                 var data = new ScreenshotData {result=result, superSampled=_settings.SuperSampling, showNotification=byUser };
-                if (result != null) _screenshotQueue.Add(result.handle, data);
+                if (result != null)
+                {
+                    _screenshotQueue.Add(result.handle, data);
+                    _lastScreenshotHandle = result.handle;
+                }
                 if (success && byUser)
                 {
                     if (_settings.Audio) PlayScreenshotSound(); // Sound effect

@@ -87,6 +87,7 @@ namespace SuperScreenShotterVR
             var icon = Properties.Resources.app_logo as System.Drawing.Icon;
             _notifyIcon = new System.Windows.Forms.NotifyIcon();
             _notifyIcon.Click += NotifyIcon_Click;
+            _notifyIcon.Text = "Click to show the SuperScreenShotterVR window";
             _notifyIcon.Icon = icon;
             _notifyIcon.Visible = true;
 
