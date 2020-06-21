@@ -12,11 +12,11 @@
             <GroupBox Header="Status &amp; Help" DockPanel.Dock="Top" Background="WhiteSmoke" Margin="10">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="5">
-                        <Label Content="OpenVR Status:"/>
+                        <Label Content="OpenVR status:"/>
                         <Label x:Name="Label_Status" Content="OpenVR Status" Background="Gray" Foreground="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                        <Label Content="Current AppID:"/>
+                        <Label Content="Current app ID:"/>
                         <Label x:Name="Label_AppId" Content="Steam AppID" Background="Gray" Foreground="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="5 0 5 5">

@@ -40,14 +40,13 @@ namespace SuperScreenShotterVR
             InitializeComponent();
             
             // Prevent multiple instances running at once
-            const string appName = "SuperScreenShotterVR";
-            _mutex = new Mutex(true, appName, out bool createdNew);
+            _mutex = new Mutex(true, Properties.Resources.AppName, out bool createdNew);
             if (!createdNew)
             {
                 System.Windows.MessageBox.Show(
                 System.Windows.Application.Current.MainWindow,
                 "This application is already running!",
-                "SuperScreenShotterVR",
+                Properties.Resources.AppName,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information
                 );
@@ -87,7 +86,7 @@ namespace SuperScreenShotterVR
             var icon = Properties.Resources.app_logo as System.Drawing.Icon;
             _notifyIcon = new System.Windows.Forms.NotifyIcon();
             _notifyIcon.Click += NotifyIcon_Click;
-            _notifyIcon.Text = "Click to show the SuperScreenShotterVR window";
+            _notifyIcon.Text = $"Click to show the {Properties.Resources.AppName} window";
             _notifyIcon.Icon = icon;
             _notifyIcon.Visible = true;
 
@@ -127,7 +126,7 @@ namespace SuperScreenShotterVR
 
         private void InitSettings()
         {
-            Label_Version.Content = _settings.Version;
+            Label_Version.Content = Properties.Resources.Version;
             TextBox_TimerSeconds.IsEnabled = !_settings.CaptureTimer;
 
             if (_settings.Directory == string.Empty)
@@ -255,7 +254,7 @@ namespace SuperScreenShotterVR
             {
                 _controller.UpdateScreenshotHook();
             } else {
-                var result = System.Windows.MessageBox.Show("You need to restart this application to restore original screenshot functionality, do it now?", "SuperScreenShotterVR", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
+                var result = System.Windows.MessageBox.Show("You need to restart this application to restore original screenshot functionality, do it now?", Properties.Resources.AppName, MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
                 if(result == MessageBoxResult.Yes)
                 {
                     System.Windows.Application.Current.Shutdown();
