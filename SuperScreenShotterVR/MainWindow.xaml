@@ -5,97 +5,93 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuperScreenShotterVR"
         mc:Ignorable="d"
-        Title="SuperScreenShotterVR" Height="610" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
-    <ScrollViewer>
+        Title="SuperScreenShotterVR" Height="615" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
+    <StackPanel Orientation="Vertical">
+        <GroupBox Header="Status &amp; Help" DockPanel.Dock="Top" Background="WhiteSmoke" Margin="10">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <Label Content="OpenVR status:"/>
+                    <Label x:Name="Label_Status" Content="OpenVR Status" Background="Gray" Foreground="White"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
+                    <Label Content="Current app ID:"/>
+                    <Label x:Name="Label_AppId" Content="Steam AppID" Background="Gray" Foreground="White"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
+                    <TextBlock x:Name="textBlock_Help" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top">
+                        <Hyperlink NavigateUri="https://github.com/BOLL7708/SuperScreenShotterVR" Click="ClickedURL">Help</Hyperlink>
+                    </TextBlock>
+                    <TextBlock x:Name="textBlock_Issue" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="10 0 10 0">
+                        <Hyperlink NavigateUri="https://github.com/BOLL7708/SuperScreenShotterVR/issues" Click="ClickedURL">Report issue</Hyperlink>
+                    </TextBlock>
+                    <TextBlock x:Name="textBlock_Twitter" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0 0 10 0">
+                        <Hyperlink NavigateUri="https://twitter.com/BOLL7708" Click="ClickedURL">Contact</Hyperlink>
+                    </TextBlock>
+                    <Label x:Name="Label_Version" Content="version" Padding="0"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="System" DockPanel.Dock="Top" Background="AliceBlue" Margin="10 0 10 10">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <CheckBox x:Name="CheckBox_LaunchMinimized" Content="Launch minimized " Checked="CheckBox_LaunchMinimized_Checked" Unchecked="CheckBox_LaunchMinimized_Checked"/>
+                    <CheckBox x:Name="CheckBox_Tray" Content="to tray" Checked="CheckBox_Tray_Checked" Unchecked="CheckBox_Tray_Checked"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox VerticalAlignment="Center" x:Name="CheckBox_ReplaceShortcut" Margin="5" Content="Replace SteamVR screenshot function" Checked="CheckBox_ReplaceShortcut_Checked" Unchecked="CheckBox_ReplaceShortcut_Checked"/>
+                    <Button x:Name="Button_RehookShortcut" Content="Rehook" Padding="4" Click="Button_RehookShortcut_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="Capture &amp; Output" DockPanel.Dock="Top" Background="Linen" Margin="10 0 10 10">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <CheckBox x:Name="CheckBox_CaptureTimer" Content="Capture on a timer every: " Checked="CheckBox_CaptureTimer_Checked" Unchecked="CheckBox_CaptureTimer_Checked"/>
+                    <TextBox x:Name="TextBox_TimerSeconds" Text="0" LostFocus="TextBox_TimerSeconds_LostFocus"/>
+                    <Label Content=" seconds (no notification)" Padding="0"/>
+                </StackPanel>
+                <CheckBox x:Name="CheckBox_SubmitToSteam" Margin="5 0 5 5" Content="Submit screenshots to Steam Screenshot Library" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
+                <CheckBox x:Name="CheckBox_SuperSampling" Margin="5 0 5 5" Content="Attempt supersampling boost (experimental)" Checked="CheckBox_SuperSampling_Checked" Unchecked="CheckBox_SuperSampling_Checked"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Output root folder:"/>
+                    <Button x:Name="Button_BrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
+                    <Label x:Name="Label_Directory" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
 
-        <StackPanel Orientation="Vertical">
-            <GroupBox Header="Status &amp; Help" DockPanel.Dock="Top" Background="WhiteSmoke" Margin="10">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal" Margin="5">
-                        <Label Content="OpenVR status:"/>
-                        <Label x:Name="Label_Status" Content="OpenVR Status" Background="Gray" Foreground="White"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                        <Label Content="Current app ID:"/>
-                        <Label x:Name="Label_AppId" Content="Steam AppID" Background="Gray" Foreground="White"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                        <TextBlock x:Name="textBlock_Help" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top">
-                            <Hyperlink NavigateUri="https://github.com/BOLL7708/SuperScreenShotterVR" Click="ClickedURL">Help</Hyperlink>
-                        </TextBlock>
-                        <TextBlock x:Name="textBlock_Issue" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="10 0 10 0">
-                            <Hyperlink NavigateUri="https://github.com/BOLL7708/SuperScreenShotterVR/issues" Click="ClickedURL">Report issue</Hyperlink>
-                        </TextBlock>
-                        <TextBlock x:Name="textBlock_Twitter" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0 0 10 0">
-                            <Hyperlink NavigateUri="https://twitter.com/BOLL7708" Click="ClickedURL">Contact</Hyperlink>
-                        </TextBlock>
-                        <Label x:Name="Label_Version" Content="version" Padding="0"/>
-                    </StackPanel>
+        <GroupBox Header="Notifications &amp; Audio" Background="MintCream" Margin="10 0 10 10" DockPanel.Dock="Top">
+            <StackPanel Orientation="Vertical">
+                <CheckBox x:Name="CheckBox_Notifications" Margin="5" Content="Display notification on screenshot capture" Checked="CheckBox_Notifications_Checked" Unchecked="CheckBox_Notifications_Checked"/>
+                <CheckBox x:Name="CheckBox_Thumbnail" Margin="5 0 5 5" Content="Display thumbnail in notification" Checked="CheckBox_Thumbnail_Checked" Unchecked="CheckBox_Thumbnail_Checked"/>
+                <CheckBox x:Name="CheckBox_Audio" Margin="5 0 5 5" Content="Play sound effect on capture" Checked="CheckBox_Audio_Checked" Unchecked="CheckBox_Audio_Checked"/>
+                <StackPanel Orientation="Horizontal" Visibility="Collapsed">
+                    <Label Content="Sound file:"/>
+                    <Button x:Name="Button_BrowseAudio" Padding="4" Content="Browse..." Click="Button_BrowseAudio_Click"/>
+                    <Label x:Name="Label_CustomAudio" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
                 </StackPanel>
-            </GroupBox>
-            <GroupBox Header="System" DockPanel.Dock="Top" Background="AliceBlue" Margin="10 0 10 10">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal" Margin="5">
-                        <CheckBox x:Name="CheckBox_LaunchMinimized" Content="Launch minimized " Checked="CheckBox_LaunchMinimized_Checked" Unchecked="CheckBox_LaunchMinimized_Checked"/>
-                        <CheckBox x:Name="CheckBox_Tray" Content="to tray" Checked="CheckBox_Tray_Checked" Unchecked="CheckBox_Tray_Checked"/>
-                    </StackPanel>
-                    <CheckBox x:Name="CheckBox_ReplaceShortcut" Margin="5 0 5 5" Content="Replace SteamVR screenshot function" Checked="CheckBox_ReplaceShortcut_Checked" Unchecked="CheckBox_ReplaceShortcut_Checked"/>
-                </StackPanel>
-            </GroupBox>
-            <GroupBox Header="Capture &amp; Output" DockPanel.Dock="Top" Background="Linen" Margin="10 0 10 10">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal" Margin="5">
-                        <CheckBox x:Name="CheckBox_CaptureTimer" Content="Capture on a timer every: " Checked="CheckBox_CaptureTimer_Checked" Unchecked="CheckBox_CaptureTimer_Checked"/>
-                        <TextBox x:Name="TextBox_TimerSeconds" Text="0" LostFocus="TextBox_TimerSeconds_LostFocus"/>
-                        <Label Content=" seconds (no notification)" Padding="0"/>
-                    </StackPanel>
-                    <CheckBox x:Name="CheckBox_SubmitToSteam" Margin="5 0 5 5" Content="Submit screenshots to Steam Screenshot Library" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
-                    <CheckBox x:Name="CheckBox_SuperSampling" Margin="5 0 5 5" Content="Attempt supersampling boost (experimental)" Checked="CheckBox_SuperSampling_Checked" Unchecked="CheckBox_SuperSampling_Checked"/>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Output root folder:"/>
-                        <Button x:Name="Button_BrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
-                        <Label x:Name="Label_Directory" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
-                    </StackPanel>
-                </StackPanel>
-            </GroupBox>
-            
-            <GroupBox Header="Notifications &amp; Audio" Background="MintCream" Margin="10 0 10 10" DockPanel.Dock="Top">
-                <StackPanel Orientation="Vertical">
-                    <CheckBox x:Name="CheckBox_Notifications" Margin="5" Content="Display notification on screenshot capture" Checked="CheckBox_Notifications_Checked" Unchecked="CheckBox_Notifications_Checked"/>
-                    <CheckBox x:Name="CheckBox_Thumbnail" Margin="5 0 5 5" Content="Display thumbnail in notification" Checked="CheckBox_Thumbnail_Checked" Unchecked="CheckBox_Thumbnail_Checked"/>
-                    <CheckBox x:Name="CheckBox_Audio" Margin="5 0 5 5" Content="Play sound effect on capture" Checked="CheckBox_Audio_Checked" Unchecked="CheckBox_Audio_Checked"/>
-                    <StackPanel Orientation="Horizontal" Visibility="Collapsed">
-                        <Label Content="Sound file:"/>
-                        <Button x:Name="Button_BrowseAudio" Padding="4" Content="Browse..." Click="Button_BrowseAudio_Click"/>
-                        <Label x:Name="Label_CustomAudio" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
-                    </StackPanel>
-                </StackPanel>
-            </GroupBox>
+            </StackPanel>
+        </GroupBox>
 
-            <GroupBox Header="Viewfinder" DockPanel.Dock="Top" Margin="10 0 10 10" Background="LavenderBlush">
-                <StackPanel Orientation="Vertical">
-                    <CheckBox x:Name="CheckBox_ViewFinder" Margin="5" Content="Enable viewfinder overlay in headset (binding)" Checked="CheckBox_ViewFinder_Checked" Unchecked="CheckBox_ViewFinder_Checked"/>
-                    <DockPanel LastChildFill="True">
-                        <Label Content="Distance: " Padding="5 5 0 5"/>
-                        <Label x:Name="Label_OverlayDistance" Content="100m" Padding="0 5 5 5" MinWidth="40"/>
-                        <Slider x:Name="Slider_OverlayDistance" Maximum="100" Minimum="17.1" ValueChanged="Slider_OverlayDistance_ValueChanged"/>
-                    </DockPanel>
-                    <DockPanel LastChildFill="True">
-                        <Label Content="Opacity: " Padding="5 5 0 5"/>
-                        <Label x:Name="Label_OverlayOpacity" Content="100%" Padding="0 5 5 5" MinWidth="40"/>
-                        <Slider x:Name="Slider_OverlayOpacity" Maximum="100" Minimum="1" ValueChanged="Slider_OverlayOpacity_ValueChanged"/>
-                    </DockPanel>
-                    <DockPanel LastChildFill="True">
-                        <Label Content="Reticle size: " Padding="5 5 0 5"/>
-                        <Label x:Name="Label_ReticleSize" Content="25%" Padding="0 5 5 5" MinWidth="40"/>
-                        <Slider x:Name="Slider_ReticleSize" Maximum="100" Minimum="1" ValueChanged="Slider_ReticleSize_ValueChanged"/>
-                    </DockPanel>
-                </StackPanel>
-            </GroupBox>
-
-            <GroupBox Header="Log" DockPanel.Dock="Top" MinHeight="100" Margin="10 0 10 10" Background="Ivory">
-                <TextBox Margin="5" x:Name="TextBox_Log" IsEnabled="False"/>
-            </GroupBox>
-        </StackPanel>
-    </ScrollViewer>
+        <GroupBox Header="Viewfinder" DockPanel.Dock="Top" Margin="10 0 10 10" Background="LavenderBlush">
+            <StackPanel Orientation="Vertical">
+                <CheckBox x:Name="CheckBox_ViewFinder" Margin="5" Content="Enable viewfinder overlay in headset (binding)" Checked="CheckBox_ViewFinder_Checked" Unchecked="CheckBox_ViewFinder_Checked"/>
+                <DockPanel LastChildFill="True">
+                    <Label Content="Distance: " Padding="5 5 0 5"/>
+                    <Label x:Name="Label_OverlayDistance" Content="100m" Padding="0 5 5 5" MinWidth="40"/>
+                    <Slider x:Name="Slider_OverlayDistance" Maximum="100" Minimum="17.1" ValueChanged="Slider_OverlayDistance_ValueChanged"/>
+                </DockPanel>
+                <DockPanel LastChildFill="True">
+                    <Label Content="Opacity: " Padding="5 5 0 5"/>
+                    <Label x:Name="Label_OverlayOpacity" Content="100%" Padding="0 5 5 5" MinWidth="40"/>
+                    <Slider x:Name="Slider_OverlayOpacity" Maximum="100" Minimum="1" ValueChanged="Slider_OverlayOpacity_ValueChanged"/>
+                </DockPanel>
+                <DockPanel LastChildFill="True">
+                    <Label Content="Reticle size: " Padding="5 5 0 5"/>
+                    <Label x:Name="Label_ReticleSize" Content="25%" Padding="0 5 5 5" MinWidth="40"/>
+                    <Slider x:Name="Slider_ReticleSize" Maximum="100" Minimum="1" ValueChanged="Slider_ReticleSize_ValueChanged"/>
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
+    </StackPanel>
 </Window>

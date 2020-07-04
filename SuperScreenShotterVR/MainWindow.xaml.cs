@@ -74,11 +74,7 @@ namespace SuperScreenShotterVR
             _controller.SetDebugLogAction((message) => {
                 Dispatcher.Invoke(()=>{
                     var time = DateTime.Now.ToString("HH:mm:ss");
-                    var oldLog = TextBox_Log.Text;
-                    var lines = oldLog.Split('\n');
-                    Array.Resize(ref lines, 3);
-                    var newLog = string.Join("\n", lines);
-                    TextBox_Log.Text = $"{time}: {message}\n{newLog}";
+                    Debug.WriteLine($"{time}: {message}");
                 });
             });
             _controller.Init();
@@ -156,6 +152,7 @@ namespace SuperScreenShotterVR
             Label_CustomAudio.ToolTip = _settings.CustomAudio;
 
             CheckBox_ReplaceShortcut.IsChecked = _settings.ReplaceShortcut;
+            Button_RehookShortcut.IsEnabled = _settings.ReplaceShortcut;
             CheckBox_LaunchMinimized.IsChecked = _settings.LaunchMinimized;
             CheckBox_Tray.IsChecked = _settings.Tray;
 
@@ -250,6 +247,7 @@ namespace SuperScreenShotterVR
             var value = CheckboxValue(e);
             _settings.ReplaceShortcut = value;
             _settings.Save();
+            Button_RehookShortcut.IsEnabled = value;
             if (value)
             {
                 _controller.UpdateScreenshotHook();
@@ -323,6 +321,11 @@ namespace SuperScreenShotterVR
                 _settings.ReticleSize = (float)e.NewValue;
                 _settings.Save();
             }
+        }
+
+        private void Button_RehookShortcut_Click(object sender, RoutedEventArgs e)
+        {
+            _controller.UpdateScreenshotHook(true);
         }
     }
 }

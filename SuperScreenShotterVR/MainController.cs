@@ -233,7 +233,7 @@ namespace SuperScreenShotterVR
 
         private ulong CreateOverlay(string imageFileName, string uniqueKey, string title) {
             // Instantiate overlay, width and transform is set in UpdateOverlays()
-            ulong handle = _ovr.CreateOverlay(uniqueKey, title, Utils.GetEmptyTransform(), 1, _trackedDeviceIndex);
+            ulong handle = _ovr.CreateOverlay(uniqueKey, title, EasyOpenVRSingleton.Utils.GetEmptyTransform(), 1, _trackedDeviceIndex);
 
             // Apply texture
             var path = $"{Directory.GetCurrentDirectory()}\\resources\\{imageFileName}.png";
@@ -257,13 +257,13 @@ namespace SuperScreenShotterVR
                 var hmdTransform = pose.mDeviceToAbsoluteTracking;
 
                 // Static overlay
-                var overlayTransform = Utils.GetEmptyTransform();
+                var overlayTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform();
                 overlayTransform.m11 = -distance;
                 
                 // Pitch indicator
-                var YPR = Utils.RotationMatrixToYPR(hmdTransform);
+                var YPR = EasyOpenVRSingleton.Utils.RotationMatrixToYPR(hmdTransform);
                 var pitchYPR = new YPR { yaw = 0, pitch = 0, roll = 0 };
-                var pitchTransform = Utils.GetTransformFromEuler(pitchYPR);
+                var pitchTransform = EasyOpenVRSingleton.Utils.GetTransformFromEuler(pitchYPR);
                 var pitchY = (float) -YPR.pitch * distance; // Y-pos, somehow this works
                 var reticleSizeFactor = _settings.ReticleSize / 100;
                 var limitY = width * reticleSizeFactor / 2 / _reticleTextureSize.aspectRatio;
@@ -274,7 +274,7 @@ namespace SuperScreenShotterVR
 
                 // Roll indicator
                 var rollYPR = new YPR { yaw = 0, pitch = 0, roll = -YPR.roll };
-                var rollTransform = Utils.GetTransformFromEuler(rollYPR);
+                var rollTransform = EasyOpenVRSingleton.Utils.GetTransformFromEuler(rollYPR);
                 rollTransform.m11 = -distance;
                
                 // Update
@@ -308,9 +308,9 @@ namespace SuperScreenShotterVR
             }
         }
 
-        public void UpdateScreenshotHook()
+        public void UpdateScreenshotHook(bool force = false)
         {
-            if(_ovr.IsInitialized() && _settings.ReplaceShortcut && !_isHookedForScreenshots)
+            if(_ovr.IsInitialized() && (force || (_settings.ReplaceShortcut && !_isHookedForScreenshots)))
             {
                 _isHookedForScreenshots = _ovr.HookScreenshots();
                 Debug.WriteLine($"Hooking for screenshots: {_isHookedForScreenshots}");
