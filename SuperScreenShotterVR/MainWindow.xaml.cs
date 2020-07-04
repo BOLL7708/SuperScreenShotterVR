@@ -148,8 +148,6 @@ namespace SuperScreenShotterVR
             CheckBox_Notifications.IsChecked = _settings.Notifications;
             CheckBox_Thumbnail.IsChecked = _settings.Thumbnail;
             CheckBox_Audio.IsChecked = _settings.Audio;
-            Label_CustomAudio.Content = _settings.CustomAudio;
-            Label_CustomAudio.ToolTip = _settings.CustomAudio;
 
             CheckBox_ReplaceShortcut.IsChecked = _settings.ReplaceShortcut;
             Button_RehookShortcut.IsEnabled = _settings.ReplaceShortcut;
@@ -224,22 +222,6 @@ namespace SuperScreenShotterVR
         {
             _settings.Audio = CheckboxValue(e);
             _settings.Save();
-        }
-
-        private void Button_BrowseAudio_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new System.Windows.Forms.OpenFileDialog
-            {
-                Filter = "Waveform Audio File|*.wav"
-            };
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK)
-            {
-                _settings.CustomAudio = dialog.FileName;
-                _settings.Save();
-                Label_CustomAudio.Content = _settings.CustomAudio;
-                Label_CustomAudio.ToolTip = _settings.CustomAudio;
-            }
         }
 
         private void CheckBox_ReplaceShortcut_Checked(object sender, RoutedEventArgs e)

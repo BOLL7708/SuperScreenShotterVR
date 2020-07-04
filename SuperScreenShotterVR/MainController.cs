@@ -208,10 +208,6 @@ namespace SuperScreenShotterVR
 
         private void ToggleViewfinder(bool visible)
         {
-            // TODO: Consider disabling viewfinder as long as screenshot is being taken to avoid the post-capture flicker
-            // TODO: Test this locally before pushing it live
-            // TODO: Also create them without looking for them the first time to avoid errors in the log.
-
             _viewfinderOverlayHandle = _ovr.FindOverlay(VIEWFINDER_OVERLAY_UNIQUE_KEY);
             _rollIndicatorOverlayHandle = _ovr.FindOverlay(ROLL_INDICATOR_OVERLAY_UNIQUE_KEY);
             _pitchIndicatorOverlayHandle = _ovr.FindOverlay(PITCH_INDICATOR_OVERLAY_UNIQUE_KEY);
@@ -229,6 +225,8 @@ namespace SuperScreenShotterVR
             _ovr.SetOverlayVisibility(_pitchIndicatorOverlayHandle, shouldBeVisible);
             _ovr.SetOverlayVisibility(_reticleOverlayHandle, shouldBeVisible);
             _overlayIsVisible = shouldBeVisible;
+
+            if (shouldBeVisible) UpdateScreenshotHook(true); // Fix: During long sessions the hook can release, re-hooking often has so far not shown to have any adverse effects.
         }
 
         private ulong CreateOverlay(string imageFileName, string uniqueKey, string title) {
@@ -252,18 +250,17 @@ namespace SuperScreenShotterVR
                 var fov = _screenshotFoV;
                 var width = (float)Math.Tan(fov / 2f * Math.PI / 180) * distance * 2;
 
-                // Pose
+                // Pose & orientation
                 var pose = poses[_trackedDeviceIndex];
                 var hmdTransform = pose.mDeviceToAbsoluteTracking;
+                var YPR = EasyOpenVRSingleton.Utils.RotationMatrixToYPR(hmdTransform);
 
                 // Static overlay
                 var overlayTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform();
                 overlayTransform.m11 = -distance;
                 
                 // Pitch indicator
-                var YPR = EasyOpenVRSingleton.Utils.RotationMatrixToYPR(hmdTransform);
-                var pitchYPR = new YPR { yaw = 0, pitch = 0, roll = 0 };
-                var pitchTransform = EasyOpenVRSingleton.Utils.GetTransformFromEuler(pitchYPR);
+                var pitchTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform();
                 var pitchY = (float) -YPR.pitch * distance; // Y-pos, somehow this works
                 var reticleSizeFactor = _settings.ReticleSize / 100;
                 var limitY = width * reticleSizeFactor / 2 / _reticleTextureSize.aspectRatio;
@@ -310,7 +307,7 @@ namespace SuperScreenShotterVR
 
         public void UpdateScreenshotHook(bool force = false)
         {
-            if(_ovr.IsInitialized() && (force || (_settings.ReplaceShortcut && !_isHookedForScreenshots)))
+            if(_ovr.IsInitialized() && _settings.ReplaceShortcut && (force || !_isHookedForScreenshots))
             {
                 _isHookedForScreenshots = _ovr.HookScreenshots();
                 Debug.WriteLine($"Hooking for screenshots: {_isHookedForScreenshots}");

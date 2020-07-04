@@ -90,7 +90,7 @@ namespace SuperScreenShotterVR.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to v0.37.
+        ///   Looks up a localized string similar to v0.39.
         /// </summary>
         internal static string Version {
             get {
