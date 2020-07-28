@@ -3,6 +3,10 @@
 		{
 			"controller_type": "knuckles",
 			"binding_url": "bindings_knuckles.json"
+		},
+		{
+			"controller_type": "gamepad",
+			"binding_url": "bindings_gamepad.json"
 		}
 	],
 	"actions": [

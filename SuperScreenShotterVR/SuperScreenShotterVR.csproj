@@ -126,6 +126,9 @@
     <None Include="app.vrmanifest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="bindings_gamepad.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="bindings_knuckles.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

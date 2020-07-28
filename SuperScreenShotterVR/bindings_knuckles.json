@@ -24,34 +24,14 @@
             {
                "inputs" : {},
                "mode" : "button",
-               "path" : "/user/hand/left/input/b"
-            },
-            {
-               "inputs" : {},
-               "mode" : "button",
                "path" : "/user/hand/left/input/trigger"
-            },
-            {
-               "inputs" : {},
-               "mode" : "button",
-               "path" : "/user/hand/right/input/b"
             },
             {
                "inputs" : {},
                "mode" : "button",
                "path" : "/user/hand/right/input/trigger"
             },
-            {
-               "inputs" : {},
-               "mode" : "button",
-               "path" : "/user/hand/right/input/a"
-            },
-            {
-               "inputs" : {},
-               "mode" : "button",
-               "path" : "/user/hand/left/input/a"
-            },
-            {
+             {
                "inputs" : {},
                "mode" : "button",
                "path" : "/user/hand/left/input/system"
@@ -59,79 +39,7 @@
             {
                "inputs" : {},
                "mode" : "button",
-               "path" : "/user/hand/left/input/trackpad"
-            },
-            {
-               "inputs" : {},
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "click"
-               },
-               "path" : "/user/hand/left/input/trackpad"
-            },
-            {
-               "inputs" : {},
-               "mode" : "button",
-               "path" : "/user/hand/left/input/thumbstick"
-            },
-            {
-               "inputs" : {},
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "touch"
-               },
-               "path" : "/user/hand/left/input/thumbstick"
-            },
-            {
-               "inputs" : {},
-               "mode" : "grab",
-               "path" : "/user/hand/left/input/grip"
-            },
-            {
-               "inputs" : {},
-               "mode" : "grab",
-               "path" : "/user/hand/left/input/pinch"
-            },
-            {
-               "inputs" : {},
-               "mode" : "button",
                "path" : "/user/hand/right/input/system"
-            },
-            {
-               "inputs" : {},
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trackpad"
-            },
-            {
-               "inputs" : {},
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "click"
-               },
-               "path" : "/user/hand/right/input/trackpad"
-            },
-            {
-               "inputs" : {},
-               "mode" : "button",
-               "path" : "/user/hand/right/input/thumbstick"
-            },
-            {
-               "inputs" : {},
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "touch"
-               },
-               "path" : "/user/hand/right/input/thumbstick"
-            },
-            {
-               "inputs" : {},
-               "mode" : "grab",
-               "path" : "/user/hand/right/input/grip"
-            },
-            {
-               "inputs" : {},
-               "mode" : "grab",
-               "path" : "/user/hand/right/input/pinch"
             }
          ]
       }
@@ -139,7 +47,7 @@
    "category" : "steamvr_input",
    "controller_type" : "knuckles",
    "description" : "Default Index Controller Bindings",
-   "name" : "SuperScreenShotterVR configuration for Index Controller",
+   "name" : "Default SuperScreenShotterVR configuration for Index Controller",
    "options" : {},
    "simulated_actions" : []
 }

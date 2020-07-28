@@ -104,11 +104,11 @@ namespace SuperScreenShotterVR
                         // TODO: After restart these do not get registered again??!!??
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/take_screenshot",
-                            (data, handle) => { if (data.bState) ScreenshotTriggered(); }
+                            (data, handle) => { if (data.bState && !OpenVR.Overlay.IsDashboardVisible()) ScreenshotTriggered(); }
                         );
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/show_viewfinder",
-                            (data, handle) => { ToggleViewfinder(data.bState); }
+                            (data, handle) => { ToggleViewfinder(data.bState && !OpenVR.Overlay.IsDashboardVisible()); }
                         );
                         _notificationOverlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
                         _currentAppId = _ovr.GetRunningApplicationId();
@@ -159,6 +159,10 @@ namespace SuperScreenShotterVR
                             // This is triggered when someone changes their headset display frequency in SteamVR
                             // (as well as other settings)
                             UpdateDisplayFrequency();
+                        });
+                        _ovr.RegisterEvent(EVREventType.VREvent_DashboardActivated, (data) =>
+                        {
+                            ToggleViewfinder(false);
                         });
                         Debug.WriteLine("Init complete.");
                     }
