@@ -71,6 +71,15 @@ namespace SuperScreenShotterVR
                     Label_AppId.Background = appIdFixed != string.Empty ? System.Windows.Media.Brushes.OliveDrab : System.Windows.Media.Brushes.Gray;
                 });
             };
+            _controller.ExitAction = () =>
+            {
+                Dispatcher.Invoke(() => { 
+                    if (_settings.ExitWithSteamVR)
+                    {
+                        ExitApplication();
+                    }
+                });
+            };
             _controller.SetDebugLogAction((message) => {
                 Dispatcher.Invoke(()=>{
                     var time = DateTime.Now.ToString("HH:mm:ss");
@@ -122,7 +131,11 @@ namespace SuperScreenShotterVR
 
         private void InitSettings()
         {
+#if DEBUG
+            Label_Version.Content = $"{Properties.Resources.Version}d";
+#else
             Label_Version.Content = Properties.Resources.Version;
+#endif
             TextBox_TimerSeconds.IsEnabled = !_settings.CaptureTimer;
 
             if (_settings.Directory == string.Empty)
@@ -153,6 +166,7 @@ namespace SuperScreenShotterVR
             Button_RehookShortcut.IsEnabled = _settings.ReplaceShortcut;
             CheckBox_LaunchMinimized.IsChecked = _settings.LaunchMinimized;
             CheckBox_Tray.IsChecked = _settings.Tray;
+            CheckBox_ExitWithSteamVR.IsChecked = _settings.ExitWithSteamVR;
 
             Slider_OverlayDistance.Value = _settings.OverlayDistanceGui;
             Slider_OverlayOpacity.Value = _settings.OverlayOpacity;
@@ -160,6 +174,11 @@ namespace SuperScreenShotterVR
             _settingsLoaded = true;
         }
 
+        private void ExitApplication() {
+            if (_notifyIcon != null) _notifyIcon.Dispose();
+            System.Windows.Application.Current.Shutdown();
+        }
+        
         private bool CheckboxValue(RoutedEventArgs e)
         {
             var name = e.RoutedEvent.Name;
@@ -237,7 +256,7 @@ namespace SuperScreenShotterVR
                 var result = System.Windows.MessageBox.Show("You need to restart this application to restore original screenshot functionality, do it now?", Properties.Resources.AppName, MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
                 if(result == MessageBoxResult.Yes)
                 {
-                    System.Windows.Application.Current.Shutdown();
+                    ExitApplication();
                     // TODO: Should also relaunch it.
                 }
             }
@@ -308,6 +327,12 @@ namespace SuperScreenShotterVR
         private void Button_RehookShortcut_Click(object sender, RoutedEventArgs e)
         {
             _controller.UpdateScreenshotHook(true);
+        }
+
+        private void CheckBox_ExitWithSteamVR_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.ExitWithSteamVR = CheckboxValue(e);
+            _settings.Save();
         }
     }
 }

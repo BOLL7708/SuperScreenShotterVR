@@ -50,6 +50,7 @@ namespace SuperScreenShotterVR
         // Actions
         public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
         public Action<string> AppUpdateAction { get; set; } = (appId) => { Debug.WriteLine("No appID action set."); };
+        public Action ExitAction { get; set; } = () => { Debug.WriteLine("No exit action set."); };
 
         public void Init()
         {
@@ -344,6 +345,7 @@ namespace SuperScreenShotterVR
                 _shouldShutDown = false;
                 _ovr.Shutdown();
                 _initComplete = false;
+                ExitAction.Invoke();
             }
         }
 

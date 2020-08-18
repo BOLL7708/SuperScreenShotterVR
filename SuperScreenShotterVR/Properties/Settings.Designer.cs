@@ -226,5 +226,17 @@ namespace SuperScreenShotterVR.Properties {
                 this["ReticleSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ExitWithSteamVR {
+            get {
+                return ((bool)(this["ExitWithSteamVR"]));
+            }
+            set {
+                this["ExitWithSteamVR"] = value;
+            }
+        }
     }
 }

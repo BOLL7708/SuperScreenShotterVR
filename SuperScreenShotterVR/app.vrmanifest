@@ -3,7 +3,7 @@
 		"app_key": "boll7708.superscreenshottervr",
 		"launch_type": "binary",
 		"binary_path_windows": "SuperScreenShotterVR.exe",
-		"is_dashboard_overlay": false,
+		"is_dashboard_overlay": true,
 		"action_manifest_path": "./actions.json",
 
 		"strings": {

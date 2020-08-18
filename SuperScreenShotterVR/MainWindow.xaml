@@ -35,7 +35,8 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="5">
                     <CheckBox x:Name="CheckBox_LaunchMinimized" Content="Launch minimized " Checked="CheckBox_LaunchMinimized_Checked" Unchecked="CheckBox_LaunchMinimized_Checked"/>
-                    <CheckBox x:Name="CheckBox_Tray" Content="to tray" Checked="CheckBox_Tray_Checked" Unchecked="CheckBox_Tray_Checked"/>
+                    <CheckBox x:Name="CheckBox_Tray" Content="to tray, " Checked="CheckBox_Tray_Checked" Unchecked="CheckBox_Tray_Checked"/>
+                    <CheckBox x:Name="CheckBox_ExitWithSteamVR" Content="exit with SteamVR" Margin="5 0 5 0" Checked="CheckBox_ExitWithSteamVR_Checked" Unchecked="CheckBox_ExitWithSteamVR_Checked"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox VerticalAlignment="Center" x:Name="CheckBox_ReplaceShortcut" Margin="5 6 5 5" Content="Replace SteamVR screenshot function" Checked="CheckBox_ReplaceShortcut_Checked" Unchecked="CheckBox_ReplaceShortcut_Checked"/>

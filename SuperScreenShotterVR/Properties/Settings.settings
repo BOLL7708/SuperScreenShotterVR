@@ -53,5 +53,8 @@
     <Setting Name="ReticleSize" Type="System.Single" Scope="User">
       <Value Profile="(Default)">25</Value>
     </Setting>
+    <Setting Name="ExitWithSteamVR" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
