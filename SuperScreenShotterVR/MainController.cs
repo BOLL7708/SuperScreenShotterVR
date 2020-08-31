@@ -146,7 +146,7 @@ namespace SuperScreenShotterVR
                             _screenshotQueue.Clear(); // To not have left-overs
                             Debug.WriteLine($"New application running: {_currentAppId}");
                         });
-                        _ovr.RegisterEvent(EVREventType.VREvent_QuitAcknowledged, (data) =>
+                        _ovr.RegisterEvent(EVREventType.VREvent_Quit, (data) =>
                         {
                             _ovr.AcknowledgeShutdown();
                             _shouldShutDown = true;
