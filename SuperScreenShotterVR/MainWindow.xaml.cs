@@ -151,7 +151,7 @@ namespace SuperScreenShotterVR
             }
 
             CheckBox_ViewFinder.IsChecked = _settings.ViewFinder;
-            CheckBox_SuperSampling.IsChecked = _settings.SuperSampling;
+            CheckBox_SaveRightImage.IsChecked = _settings.SaveRightImage;
             CheckBox_CaptureTimer.IsChecked = _settings.CaptureTimer;
             TextBox_TimerSeconds.Text = _settings.TimerSeconds.ToString();
             CheckBox_SubmitToSteam.IsChecked = _settings.SubmitToSteam;
@@ -188,12 +188,6 @@ namespace SuperScreenShotterVR
         private void CheckBox_ViewFinder_Checked(object sender, RoutedEventArgs e)
         {
             _settings.ViewFinder = CheckboxValue(e);
-            _settings.Save();
-        }
-
-        private void CheckBox_SuperSampling_Checked(object sender, RoutedEventArgs e)
-        {
-            _settings.SuperSampling = CheckboxValue(e);
             _settings.Save();
         }
 
@@ -332,6 +326,12 @@ namespace SuperScreenShotterVR
         private void CheckBox_ExitWithSteamVR_Checked(object sender, RoutedEventArgs e)
         {
             _settings.ExitWithSteamVR = CheckboxValue(e);
+            _settings.Save();
+        }
+
+        private void CheckBox_SaveRightImage_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.SaveRightImage = CheckboxValue(e);
             _settings.Save();
         }
     }

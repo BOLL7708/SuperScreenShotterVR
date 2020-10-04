@@ -26,18 +26,6 @@ namespace SuperScreenShotterVR.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool SuperSampling {
-            get {
-                return ((bool)(this["SuperSampling"]));
-            }
-            set {
-                this["SuperSampling"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool CaptureTimer {
             get {
                 return ((bool)(this["CaptureTimer"]));
@@ -236,6 +224,18 @@ namespace SuperScreenShotterVR.Properties {
             }
             set {
                 this["ExitWithSteamVR"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SaveRightImage {
+            get {
+                return ((bool)(this["SaveRightImage"]));
+            }
+            set {
+                this["SaveRightImage"] = value;
             }
         }
     }

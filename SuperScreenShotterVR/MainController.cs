@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Valve.VR;
 using static BOLL7708.EasyOpenVRSingleton;
 
@@ -54,7 +55,6 @@ namespace SuperScreenShotterVR
 
         public void Init()
         {
-            // _ovr.SetApplicationType(EVRApplicationType.VRApplication_Overlay); // Did not fix the overlay unloading between games... ?!?!
             StatusUpdateAction.Invoke(false);
             AppUpdateAction.Invoke("");
 
@@ -369,32 +369,18 @@ namespace SuperScreenShotterVR
 
         private class ScreenshotData {
             public ScreenshotResult result;
-            public bool superSampled;
             public bool showNotification;
         }
 
 
         private void ScreenshotTriggered(bool byUser=true)
         {
-            if(_settings.SuperSampling)
-            {
-                if(_screenshotQueue.Count() > 0)
-                {
-                    Debug.WriteLine("Cannot rapidly take screenshots when super sampling.");
-                    return;
-                }
-                
-                if (!_originalSuperSamplingEnabled) _ovr.SetSuperSamplingEnabledForCurrentApp(true);
-                _ovr.SetSuperSamplingForCurrentApp(5f); // Clamped to 500% by SteamVR
-                Thread.Sleep(100); // Needs at least 50ms to change render scale before taking screenshot
-            }
-            
             if (_currentAppId != string.Empty) // There needs to be a running application
             {
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 UpdateOutputFolder(true); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture
-                var data = new ScreenshotData {result=result, superSampled=_settings.SuperSampling, showNotification=byUser };
+                var data = new ScreenshotData {result=result, showNotification=byUser };
                 if (result != null)
                 {
                     _screenshotQueue.Add(result.handle, data);
@@ -403,7 +389,7 @@ namespace SuperScreenShotterVR
                 if (success && byUser)
                 {
                     if (_settings.Audio) PlayScreenshotSound(); // Sound effect
-                } 
+                }
                 else 
                 {
                     Debug.WriteLine("Taking a screenshot failed");
@@ -421,18 +407,28 @@ namespace SuperScreenShotterVR
                 var data = _screenshotQueue[handle];
                 var result = data.result;
                 var filePath = $"{result.filePath}.png";
-                if(File.Exists(filePath))
+                var filePathVR = $"{result.filePathVR}.png";
+                var filePathR = $"{result.filePath}_r.png";
+                var rect = new Rectangle();
+                if (File.Exists(filePath))
                 {
-                    if(_settings.SubmitToSteam && _currentAppId != string.Empty)
+                    rect = GetImageRectangle(filePath);
+                    if (_settings.SubmitToSteam && _currentAppId != string.Empty)
                     {
                         var submitted = _ovr.SubmitScreenshotToSteam(result);
                         Debug.WriteLine($"Managed to submit the screenshot to Steam: {submitted}");
                     } else Debug.WriteLine("Will not submit the screenshot to Steam.");
 
+                    if(_settings.SaveRightImage && File.Exists(filePathVR))
+                    {
+                        var bitmap = GetRightEyeBitmap(rect, filePathVR);
+                        SaveBitmapToPngFile(bitmap, filePathR);
+                    }
+
                     if (_settings.Notifications && _settings.Thumbnail)
                     {
                         var image = Image.FromFile(filePath);
-                        var bitmap = ResizeImage(image, 256, 256);
+                        var bitmap = ResizeImage(image, 256, 256); // Increasing this does not seem to make for a nicer icon.
                         SetAlpha(ref bitmap, 255);
                         notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap);
                     } else
@@ -445,13 +441,7 @@ namespace SuperScreenShotterVR
                 }
                 if (_settings.Notifications && data.showNotification)
                 {
-                    _ovr.EnqueueNotification(_notificationOverlayHandle, "Screenshot taken!", notificationBitmap);
-                }
-                if (data.superSampled)
-                {
-                    Thread.Sleep(100); // To allow capture to actually finish before reverting SS
-                    _ovr.SetSuperSamplingForCurrentApp(_originalSuperSampling);
-                    _ovr.SetSuperSamplingEnabledForCurrentApp(_originalSuperSamplingEnabled);
+                    _ovr.EnqueueNotification(_notificationOverlayHandle, $"Screenshot taken!\n{rect.Width}x{rect.Height}px", notificationBitmap);
                 }
                 _screenshotQueue.Remove(handle);
             } else
@@ -464,6 +454,47 @@ namespace SuperScreenShotterVR
             }
             Debug.WriteLine($"Screenshot taken done, handle: {eventData.screenshot.handle}");
         }
+
+        // https://stackoverflow.com/q/2419222
+        public static void SaveBitmapToPngFile(Bitmap bitmap, String filePath)
+        {
+            try
+            {
+                // TODO: This image does not have any (lossless) compression as no encoder options are supported.
+                // TODO: Will have to find some library to save a compressed .png to match the SteamVR .png output.
+                bitmap.Save(filePath, ImageFormat.Png);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Failed to save right eye image: {e.Message}");
+            }
+        }
+
+        // https://stackoverflow.com/a/7939908
+        public static Bitmap GetRightEyeBitmap(Rectangle cropRect, String stereoImagePath)
+        {
+            cropRect.X = cropRect.Width;
+            Bitmap bitmap = Image.FromFile(stereoImagePath) as Bitmap;
+            Bitmap newBitmap = new Bitmap(cropRect.Width, cropRect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            using (Graphics gfx = Graphics.FromImage(newBitmap))
+            {
+                gfx.DrawImage(bitmap, -cropRect.X, -cropRect.Y);
+                return newBitmap;
+            }
+        }
+
+        // https://stackoverflow.com/a/38045852
+        public static Rectangle GetImageRectangle(String filePath)
+        {
+            using (var imageStream = File.OpenRead(filePath))
+            {
+                var decoder = BitmapDecoder.Create(imageStream, BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.Default);
+                var width = decoder.Frames[0].PixelWidth;
+                var height = decoder.Frames[0].PixelHeight;
+                return new Rectangle(0, 0, width, height);
+            }
+        }
+        
 
         // https://stackoverflow.com/a/24199315
         public static Bitmap ResizeImage(Image image, int width, int height)

@@ -30,7 +30,7 @@
 	"localization" : [
 		{
 			"language_tag": "en_US",
-			"/actions/screenshots": "Screeenshots",
+			"/actions/screenshots": "Screenshot Actions",
 			"/actions/screenshots/in/take_screenshot": "Take Screenshot",
 			"/actions/screenshots/in/show_viewfinder": "Show Viewfinder"
 		}

@@ -52,7 +52,7 @@
                     <Label Content=" seconds (no notification)" Padding="0"/>
                 </StackPanel>
                 <CheckBox x:Name="CheckBox_SubmitToSteam" Margin="5 0 5 5" Content="Submit screenshots to Steam screenshot library" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
-                <CheckBox x:Name="CheckBox_SuperSampling" Margin="5 0 5 5" Content="Attempt supersampling boost (experimental)" Checked="CheckBox_SuperSampling_Checked" Unchecked="CheckBox_SuperSampling_Checked"/>
+                <CheckBox x:Name="CheckBox_SaveRightImage" Margin="5 0 5 5" Content="Also save an image for the right eye" Checked="CheckBox_SaveRightImage_Checked" Unchecked="CheckBox_SaveRightImage_Checked"/>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Output root folder:"/>
                     <Button x:Name="Button_BrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
