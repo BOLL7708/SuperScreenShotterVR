@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuperScreenShotterVR"
         mc:Ignorable="d"
-        Title="SuperScreenShotterVR" Height="615" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
+        Title="SuperScreenShotterVR" Height="730" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
     <StackPanel Orientation="Vertical">
         <GroupBox Header="Status &amp; Help" DockPanel.Dock="Top" Background="WhiteSmoke" Margin="10">
             <StackPanel Orientation="Vertical">
@@ -57,6 +57,60 @@
                     <Label Content="Output root folder:"/>
                     <Button x:Name="Button_BrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
                     <Label x:Name="Label_Directory" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Header="Hotkeys" Background="Ivory" Margin="10 0 10 10" DockPanel.Dock="Top">
+            <StackPanel Orientation="Vertical">
+                <CheckBox x:Name="CheckBox_EnableHotkeys" Margin="5" Content="Enable keyboard hotkeys" Checked="CheckBox_EnableHotkeys_Checked" Unchecked="CheckBox_EnableHotkeys_Checked"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label>Take screenshot: </Label>
+                    <CheckBox x:Name="CheckBox_ScreenshotHotkeyAlt" Margin="6" Content="Alt" Checked="CheckBox_ScreenshotHotkeyAlt_Checked" Unchecked="CheckBox_ScreenshotHotkeyAlt_Checked"/>
+                    <CheckBox x:Name="CheckBox_ScreenshotHotkeyControl" Margin="6" Content="Control" Checked="CheckBox_ScreenshotHotkeyControl_Checked" Unchecked="CheckBox_ScreenshotHotkeyControl_Checked"/>
+                    <CheckBox x:Name="CheckBox_ScreenshotHotkeyShift" Margin="6" Content="Shift" Checked="CheckBox_ScreenshotHotkeyShift_Checked" Unchecked="CheckBox_ScreenshotHotkeyShift_Checked"/>
+                    <ComboBox x:Name="ComboBox_ScreenshotHotkey" SelectionChanged="ComboBox_ScreenshotHotkey_SelectionChanged">
+                        <ComboBoxItem>Disabled</ComboBoxItem>
+                        <ComboBoxItem>F1</ComboBoxItem>
+                        <ComboBoxItem>F2</ComboBoxItem>
+                        <ComboBoxItem>F3</ComboBoxItem>
+                        <ComboBoxItem>F4</ComboBoxItem>
+                        <ComboBoxItem>F5</ComboBoxItem>
+                        <ComboBoxItem>F6</ComboBoxItem>
+                        <ComboBoxItem>F7</ComboBoxItem>
+                        <ComboBoxItem>F8</ComboBoxItem>
+                        <ComboBoxItem>F9</ComboBoxItem>
+                        <ComboBoxItem>F10</ComboBoxItem>
+                        <ComboBoxItem>F11</ComboBoxItem>
+                        <ComboBoxItem>F12</ComboBoxItem>
+                        <ComboBoxItem>F13</ComboBoxItem>
+                        <ComboBoxItem>F14</ComboBoxItem>
+                        <ComboBoxItem>F15</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label>Show viewfinder:</Label>
+                    <CheckBox x:Name="CheckBox_ViewfinderHotkeyAlt" Margin="6" Content="Alt" Checked="CheckBox_ViewfinderHotkeyAlt_Checked" Unchecked="CheckBox_ViewfinderHotkeyAlt_Checked"/>
+                    <CheckBox x:Name="CheckBox_ViewfinderHotkeyControl" Margin="6" Content="Control" Checked="CheckBox_ViewfinderHotkeyControl_Checked" Unchecked="CheckBox_ViewfinderHotkeyControl_Checked"/>
+                    <CheckBox x:Name="CheckBox_ViewfinderHotkeyShift" Margin="6" Content="Shift" Checked="CheckBox_ViewfinderHotkeyShift_Checked" Unchecked="CheckBox_ViewfinderHotkeyShift_Checked"/>
+                    <ComboBox x:Name="ComboBox_ViewfinderHotkey" SelectionChanged="ComboBox_ViewfinderHotkey_SelectionChanged">
+                        <ComboBoxItem>Disabled</ComboBoxItem>
+                        <ComboBoxItem>F1</ComboBoxItem>
+                        <ComboBoxItem>F2</ComboBoxItem>
+                        <ComboBoxItem>F3</ComboBoxItem>
+                        <ComboBoxItem>F4</ComboBoxItem>
+                        <ComboBoxItem>F5</ComboBoxItem>
+                        <ComboBoxItem>F6</ComboBoxItem>
+                        <ComboBoxItem>F7</ComboBoxItem>
+                        <ComboBoxItem>F8</ComboBoxItem>
+                        <ComboBoxItem>F9</ComboBoxItem>
+                        <ComboBoxItem>F10</ComboBoxItem>
+                        <ComboBoxItem>F11</ComboBoxItem>
+                        <ComboBoxItem>F12</ComboBoxItem>
+                        <ComboBoxItem>F13</ComboBoxItem>
+                        <ComboBoxItem>F14</ComboBoxItem>
+                        <ComboBoxItem>F15</ComboBoxItem>
+                    </ComboBox>
                 </StackPanel>
             </StackPanel>
         </GroupBox>

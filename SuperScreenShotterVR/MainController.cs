@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -42,8 +41,6 @@ namespace SuperScreenShotterVR
 
         private uint _trackedDeviceIndex = 0;
         private OverlayTextureSize _reticleTextureSize = new OverlayTextureSize();
-        private float _originalSuperSampling = 1f;
-        private bool _originalSuperSamplingEnabled = false;
         private float _displayFrequency = 90f;
         private bool _overlayIsVisible = false;
         private float _screenshotFoV = 0;
@@ -57,6 +54,8 @@ namespace SuperScreenShotterVR
         {
             StatusUpdateAction.Invoke(false);
             AppUpdateAction.Invoke("");
+
+            _mediaPlayer = new MediaPlayer();
 
             _workerThread = new Thread(WorkerThread);
             _workerThread.Start();
@@ -91,7 +90,6 @@ namespace SuperScreenShotterVR
                         _currentAppId = _ovr.GetRunningApplicationId();
                         AppUpdateAction.Invoke(_currentAppId);
                         // ToggleViewfinder(true); // DEBUG
-                        UpdateSuperSamplingValues();
                         UpdateTrackedDeviceIndex();
                         UpdateDisplayFrequency();
 
@@ -105,7 +103,7 @@ namespace SuperScreenShotterVR
                         // TODO: After restart these do not get registered again??!!??
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/take_screenshot",
-                            (data, handle) => { if (data.bState && !OpenVR.Overlay.IsDashboardVisible()) ScreenshotTriggered(); }
+                            (data, handle) => { if (data.bState && !OpenVR.Overlay.IsDashboardVisible()) TakeScreenshot(); }
                         );
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/show_viewfinder",
@@ -123,7 +121,7 @@ namespace SuperScreenShotterVR
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTriggered, (data) => {
                             Debug.WriteLine($"Screenshot triggered, handle: {data.data.screenshot.handle}");
-                            if (_isHookedForScreenshots) ScreenshotTriggered();
+                            if (_isHookedForScreenshots) TakeScreenshot();
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTaken, (data) => {
                             Debug.WriteLine($"Screenshot taken, handle: {data.data.screenshot.handle}");
@@ -142,7 +140,6 @@ namespace SuperScreenShotterVR
                             _isHookedForScreenshots = false; // To enable rehooking
                             UpdateScreenshotHook(); // Hook at new application as it seems to occasionally get dropped
                             UpdateOutputFolder();
-                            UpdateSuperSamplingValues();
                             _screenshotQueue.Clear(); // To not have left-overs
                             Debug.WriteLine($"New application running: {_currentAppId}");
                         });
@@ -177,7 +174,7 @@ namespace SuperScreenShotterVR
                             if (!_stopWatch.IsRunning) _stopWatch.Start();
                             if(_stopWatch.Elapsed.TotalSeconds >= _settings.TimerSeconds)
                             {
-                                ScreenshotTriggered(false);
+                                TakeScreenshot(false);
                                 _stopWatch.Restart();
                             }
                         } else if(_stopWatch.IsRunning)
@@ -193,15 +190,19 @@ namespace SuperScreenShotterVR
             }
         }
 
+        internal void HotkeyViewFinder(bool visible)
+        {
+            if (_initComplete) ToggleViewfinder(visible);
+        }
+
+        internal void HotkeyScreenshot()
+        {
+            if(_initComplete) TakeScreenshot();
+        }
+
         private void UpdateDisplayFrequency()
         {
             _displayFrequency = _ovr.GetFloatTrackedDeviceProperty(_trackedDeviceIndex, ETrackedDeviceProperty.Prop_DisplayFrequency_Float);
-        }
-
-        private void UpdateSuperSamplingValues()
-        {
-            _originalSuperSampling = _ovr.GetSuperSamplingForCurrentApp();
-            _originalSuperSamplingEnabled = _ovr.GetSuperSamplingEnabledForCurrentApp();
         }
 
         private void UpdateTrackedDeviceIndex()
@@ -224,7 +225,7 @@ namespace SuperScreenShotterVR
             if (_reticleOverlayHandle == 0) _reticleOverlayHandle = CreateOverlay("reticle", RETICLE_OVERLAY_UNIQUE_KEY, "SSSVRR");
             UpdateOverlays();
 
-            var shouldBeVisible = visible && _settings.ViewFinder && !_screenshotQueue.ContainsKey(_lastScreenshotHandle);
+            var shouldBeVisible = visible && _settings.ViewFinder && !_screenshotQueue.ContainsKey(_lastScreenshotHandle); // Screenshot queue meant to prevent it to flicker on after capture
             _ovr.SetOverlayVisibility(_viewfinderOverlayHandle, shouldBeVisible);
             _ovr.SetOverlayVisibility(_rollIndicatorOverlayHandle, shouldBeVisible);
             _ovr.SetOverlayVisibility(_pitchIndicatorOverlayHandle, shouldBeVisible);
@@ -352,19 +353,23 @@ namespace SuperScreenShotterVR
         private void PlayScreenshotSound(bool onlyLoad = false)
         {
             if(_mediaPlayer == null) _mediaPlayer = new MediaPlayer();
-            if(_currentAudio != _settings.CustomAudio)
+            _mediaPlayer.Dispatcher.Invoke(() => // Always execute tasks on the media player on the thread it was initiated.
             {
-                _currentAudio = _settings.CustomAudio;
-                if(_currentAudio != string.Empty && File.Exists(_currentAudio))
+                if (_currentAudio != _settings.CustomAudio)
                 {
-                    _mediaPlayer.Open(new Uri(_currentAudio));
+                    _currentAudio = _settings.CustomAudio;
+                    if (_currentAudio != string.Empty && File.Exists(_currentAudio))
+                    {
+                        _mediaPlayer.Open(new Uri(_currentAudio));
+                    }
                 }
-            }
-            if(!onlyLoad)
-            {
-                _mediaPlayer.Stop();
-                _mediaPlayer.Play();
-            }
+                if (!onlyLoad)
+                {
+                    _mediaPlayer.Stop();
+                    _mediaPlayer.Play();
+                }
+                return true;
+            });
         }
 
         private class ScreenshotData {
@@ -372,11 +377,11 @@ namespace SuperScreenShotterVR
             public bool showNotification;
         }
 
-
-        private void ScreenshotTriggered(bool byUser=true)
+        private void TakeScreenshot(bool byUser=true)
         {
             if (_currentAppId != string.Empty) // There needs to be a running application
             {
+                ToggleViewfinder(false);
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 UpdateOutputFolder(true); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture

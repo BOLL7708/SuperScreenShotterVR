@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,8 +13,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -31,9 +32,19 @@ namespace SuperScreenShotterVR
     {
         private MainController _controller = new MainController();
         private Properties.Settings _settings = Properties.Settings.Default;
-        private NotifyIcon _notifyIcon;
+        private System.Windows.Forms.NotifyIcon _notifyIcon;
         private static Mutex _mutex = null;
         private bool _settingsLoaded = false;
+        private bool _viewfinderOn = false;
+
+        // For hotkey support
+        [DllImport("user32.dll")]
+        public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
+        [DllImport("user32.dll")]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        private HwndSource _source;
+        private const int HOTKEY_ID_SCREENSHOT = 1111;
+        private const int HOTKEY_ID_VIEWFINDER = 2222;
 
         public MainWindow()
         {
@@ -115,6 +126,13 @@ namespace SuperScreenShotterVR
         // Not doing this will leave the icon after app closure
         protected override void OnClosing(CancelEventArgs e)
         {
+            // Disengage hotkeys
+            _source.RemoveHook(HwndHook);
+            _source = null;
+            var success1 = UnregisterHotKey(HOTKEY_ID_SCREENSHOT);
+            var success2 = UnregisterHotKey(HOTKEY_ID_VIEWFINDER);
+            Debug.WriteLine($"Unregistering hotkeys: {success1}, {success2}");
+
             _notifyIcon.Dispose();
             base.OnClosing(e);
         }
@@ -158,6 +176,16 @@ namespace SuperScreenShotterVR
             Label_Directory.Content = _settings.Directory;
             Label_Directory.ToolTip = _settings.Directory;
 
+            CheckBox_EnableHotkeys.IsChecked = _settings.HotkeysEnabled;
+            CheckBox_ScreenshotHotkeyAlt.IsChecked = _settings.HotkeyScreenshotAlt;
+            CheckBox_ScreenshotHotkeyControl.IsChecked = _settings.HotkeyScreenshotControl;
+            CheckBox_ScreenshotHotkeyShift.IsChecked = _settings.HotkeyScreenshotShift;
+            CheckBox_ViewfinderHotkeyAlt.IsChecked = _settings.HotkeyViewfinderAlt;
+            CheckBox_ViewfinderHotkeyControl.IsChecked = _settings.HotkeyViewfinderControl;
+            CheckBox_ViewfinderHotkeyShift.IsChecked = _settings.HotkeyViewfinderShift;
+            ComboBox_ScreenshotHotkey.SelectedIndex = _settings.HotkeyScreenshot;
+            ComboBox_ViewfinderHotkey.SelectedIndex = _settings.HotkeyViewfinder;
+
             CheckBox_Notifications.IsChecked = _settings.Notifications;
             CheckBox_Thumbnail.IsChecked = _settings.Thumbnail;
             CheckBox_Audio.IsChecked = _settings.Audio;
@@ -172,13 +200,63 @@ namespace SuperScreenShotterVR
             Slider_OverlayOpacity.Value = _settings.OverlayOpacity;
             Slider_ReticleSize.Value = _settings.ReticleSize;
             _settingsLoaded = true;
+
+            Debug.WriteLine("Settings initiated");
         }
 
         private void ExitApplication() {
             if (_notifyIcon != null) _notifyIcon.Dispose();
             System.Windows.Application.Current.Shutdown();
         }
-        
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            var helper = new WindowInteropHelper(this);
+            _source = HwndSource.FromHwnd(helper.Handle);
+            _source.AddHook(HwndHook);
+            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+        }
+
+        private bool RegisterHotKey(int ID, int key, int modifiers)
+        {
+            var helper = new WindowInteropHelper(this);
+            return RegisterHotKey(helper.Handle, ID, modifiers, key);
+        }
+
+        private bool UnregisterHotKey(int ID)
+        {
+            var helper = new WindowInteropHelper(this);
+            return UnregisterHotKey(helper.Handle, ID);
+        }
+
+        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_HOTKEY = 0x0312;
+            switch (msg)
+            {
+                case WM_HOTKEY:
+                    Debug.WriteLine($"Reacting to hotkey {wParam.ToInt32()}!");
+                    switch (wParam.ToInt32())
+                    {
+                        case HOTKEY_ID_SCREENSHOT:
+                            _controller.HotkeyScreenshot();
+                            _viewfinderOn = false;
+                            handled = true;
+                            break;
+                        case HOTKEY_ID_VIEWFINDER:
+                            _viewfinderOn = !_viewfinderOn;
+                            _controller.HotkeyViewFinder(_viewfinderOn);
+                            handled = true;
+                            break;
+                    }
+                    break;
+            }
+            return IntPtr.Zero;
+        }
+
+        // GUI listeners
         private bool CheckboxValue(RoutedEventArgs e)
         {
             var name = e.RoutedEvent.Name;
@@ -251,7 +329,7 @@ namespace SuperScreenShotterVR
                 if(result == MessageBoxResult.Yes)
                 {
                     ExitApplication();
-                    // TODO: Should also relaunch it.
+                    // TODO: Should also relaunch it. Maybe launch an invisible command prompt to execute the application again?
                 }
             }
         }
@@ -333,6 +411,125 @@ namespace SuperScreenShotterVR
         {
             _settings.SaveRightImage = CheckboxValue(e);
             _settings.Save();
+        }
+
+        private void CheckBox_EnableHotkeys_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.HotkeysEnabled = CheckboxValue(e);
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+        }
+
+        private void CheckBox_ScreenshotHotkeyAlt_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.HotkeyScreenshotAlt = CheckboxValue(e);
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+        }
+
+        private void CheckBox_ScreenshotHotkeyControl_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.HotkeyScreenshotControl = CheckboxValue(e);
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+        }
+
+        private void CheckBox_ScreenshotHotkeyShift_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.HotkeyScreenshotShift = CheckboxValue(e);
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+        }
+
+        private void ComboBox_ScreenshotHotkey_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _settings.HotkeyScreenshot = ComboBox_ScreenshotHotkey.SelectedIndex;
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+        }
+
+        private void CheckBox_ViewfinderHotkeyAlt_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.HotkeyViewfinderAlt = CheckboxValue(e);
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+        }
+
+        private void CheckBox_ViewfinderHotkeyControl_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.HotkeyViewfinderControl = CheckboxValue(e);
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+        }
+        
+        private void CheckBox_ViewfinderHotkeyShift_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.HotkeyViewfinderShift = CheckboxValue(e);
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+        }
+
+        private void ComboBox_ViewfinderHotkey_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _settings.HotkeyViewfinder = ComboBox_ViewfinderHotkey.SelectedIndex;
+            _settings.Save();
+            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+        }
+
+        // HotKeys https://stackoverflow.com/a/11378213/2076423
+        private readonly int[] KEY_MAP = { // https://stackoverflow.com/a/1153059
+            0,
+            KeyInterop.VirtualKeyFromKey(Key.F1),
+            KeyInterop.VirtualKeyFromKey(Key.F2),
+            KeyInterop.VirtualKeyFromKey(Key.F3),
+            KeyInterop.VirtualKeyFromKey(Key.F4),
+            KeyInterop.VirtualKeyFromKey(Key.F5),
+            KeyInterop.VirtualKeyFromKey(Key.F6),
+            KeyInterop.VirtualKeyFromKey(Key.F7),
+            KeyInterop.VirtualKeyFromKey(Key.F8),
+            KeyInterop.VirtualKeyFromKey(Key.F9),
+            KeyInterop.VirtualKeyFromKey(Key.F10),
+            KeyInterop.VirtualKeyFromKey(Key.F11),
+            KeyInterop.VirtualKeyFromKey(Key.F12),
+            KeyInterop.VirtualKeyFromKey(Key.F13),
+            KeyInterop.VirtualKeyFromKey(Key.F14),
+            KeyInterop.VirtualKeyFromKey(Key.F15)
+        };
+
+        private void UpdateHotkey(int ID) {
+            if (!_settingsLoaded) return;
+            var unregistered = UnregisterHotKey(ID);
+            Debug.WriteLine($"Unregistered key: {ID} ({unregistered})");
+            var keyIndex = 0;
+            var modifiers = 0;
+            switch (ID) {
+                case HOTKEY_ID_SCREENSHOT:
+                    keyIndex = _settings.HotkeyScreenshot;
+                    modifiers = GetModifiers(_settings.HotkeyScreenshotAlt, _settings.HotkeyScreenshotControl, _settings.HotkeyScreenshotShift);
+                    break;
+                case HOTKEY_ID_VIEWFINDER:
+                    keyIndex = _settings.HotkeyViewfinder;
+                    modifiers = GetModifiers(_settings.HotkeyViewfinderAlt, _settings.HotkeyViewfinderControl, _settings.HotkeyViewfinderShift);
+                    break;
+            }
+
+            int key = KEY_MAP[keyIndex];
+            if (_settings.HotkeysEnabled && key != 0)
+            {
+                var registered = RegisterHotKey(ID, key, modifiers);
+                Debug.WriteLine($"  Registered key: {ID} ({registered}), {key}, {modifiers}");
+                if(!registered) MessageBox.Show($"Could not register this global hotkey ({key}+{modifiers}), some other application might already be using it.");
+            }
+
+            int GetModifiers(bool alt, bool control, bool shift) {
+                // https://stackoverflow.com/a/32179433/2076423
+                int mod = 0;
+                if (alt) mod |= 1;
+                if (control) mod |= 2;
+                if (shift) mod |= 4;
+                return mod;
+            }
         }
     }
 }

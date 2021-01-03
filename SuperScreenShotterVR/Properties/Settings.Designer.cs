@@ -238,5 +238,113 @@ namespace SuperScreenShotterVR.Properties {
                 this["SaveRightImage"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int HotkeyScreenshot {
+            get {
+                return ((int)(this["HotkeyScreenshot"]));
+            }
+            set {
+                this["HotkeyScreenshot"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int HotkeyViewfinder {
+            get {
+                return ((int)(this["HotkeyViewfinder"]));
+            }
+            set {
+                this["HotkeyViewfinder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HotkeysEnabled {
+            get {
+                return ((bool)(this["HotkeysEnabled"]));
+            }
+            set {
+                this["HotkeysEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HotkeyScreenshotAlt {
+            get {
+                return ((bool)(this["HotkeyScreenshotAlt"]));
+            }
+            set {
+                this["HotkeyScreenshotAlt"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HotkeyScreenshotControl {
+            get {
+                return ((bool)(this["HotkeyScreenshotControl"]));
+            }
+            set {
+                this["HotkeyScreenshotControl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HotkeyScreenshotShift {
+            get {
+                return ((bool)(this["HotkeyScreenshotShift"]));
+            }
+            set {
+                this["HotkeyScreenshotShift"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HotkeyViewfinderAlt {
+            get {
+                return ((bool)(this["HotkeyViewfinderAlt"]));
+            }
+            set {
+                this["HotkeyViewfinderAlt"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HotkeyViewfinderControl {
+            get {
+                return ((bool)(this["HotkeyViewfinderControl"]));
+            }
+            set {
+                this["HotkeyViewfinderControl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HotkeyViewfinderShift {
+            get {
+                return ((bool)(this["HotkeyViewfinderShift"]));
+            }
+            set {
+                this["HotkeyViewfinderShift"] = value;
+            }
+        }
     }
 }
