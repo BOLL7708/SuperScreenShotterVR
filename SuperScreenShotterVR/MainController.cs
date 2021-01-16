@@ -94,7 +94,7 @@ namespace SuperScreenShotterVR
                         UpdateDisplayFrequency();
 
                         // App
-                        _ovr.LoadAppManifest("./app.vrmanifest");
+                        _ovr.AddApplicationManifest("./app.vrmanifest", "boll7708.superscreenshottervr", true);
 
                         // Input
                         _ovr.LoadActionManifest("./actions.json");
