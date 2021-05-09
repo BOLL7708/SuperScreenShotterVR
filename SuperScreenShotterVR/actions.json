@@ -21,12 +21,22 @@
 			"type": "boolean"
 		},
 		{
+			"name": "/actions/screenshots/in/take_delayed_screenshot",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
 			"name": "/actions/screenshots/in/take_screenshot_chord",
 			"requirement": "optional",
 			"type": "boolean"
 		},
 		{
 			"name": "/actions/screenshots/in/show_viewfinder_chord",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/screenshots/in/take_delayed_screenshot_chord",
 			"requirement": "optional",
 			"type": "boolean"
 		}
@@ -43,8 +53,10 @@
 			"/actions/screenshots": "Screenshot Actions",
 			"/actions/screenshots/in/take_screenshot": "Take Screenshot",
 			"/actions/screenshots/in/show_viewfinder": "Show Viewfinder",
+			"/actions/screenshots/in/take_delayed_screenshot": "Take Delayed Screenshot",
 			"/actions/screenshots/in/take_screenshot_chord": "Take Screenshot Chord",
-			"/actions/screenshots/in/show_viewfinder_chord": "Show Viewfinder Chord"
+			"/actions/screenshots/in/show_viewfinder_chord": "Show Viewfinder Chord",
+			"/actions/screenshots/in/take_delayed_screenshot_chord": "Take Delayed Screenshot Chord"
 		}
 	]
 }

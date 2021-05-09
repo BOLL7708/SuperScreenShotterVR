@@ -346,5 +346,29 @@ namespace SuperScreenShotterVR.Properties {
                 this["HotkeyViewfinderShift"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int DelaySeconds {
+            get {
+                return ((int)(this["DelaySeconds"]));
+            }
+            set {
+                this["DelaySeconds"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DelayCapture {
+            get {
+                return ((bool)(this["DelayCapture"]));
+            }
+            set {
+                this["DelayCapture"] = value;
+            }
+        }
     }
 }

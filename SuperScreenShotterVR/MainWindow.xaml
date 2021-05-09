@@ -51,6 +51,11 @@
                     <TextBox x:Name="TextBox_TimerSeconds" Text="0" LostFocus="TextBox_TimerSeconds_LostFocus"/>
                     <Label Content=" seconds (no notification)" Padding="0"/>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
+                    <CheckBox x:Name="CheckBox_DelayCapture" Content="Delay capture: " Checked="CheckBox_DelayCapture_Checked" Unchecked="CheckBox_DelayCapture_Checked"/>
+                    <TextBox x:Name="TextBox_DelaySeconds" Text="0" LostFocus="TextBox_Delay_LostFocus"/>
+                    <Label Content=" seconds (shows viewfinder if enabled)" Padding="0"/>
+                </StackPanel>
                 <CheckBox x:Name="CheckBox_SubmitToSteam" Margin="5 0 5 5" Content="Submit screenshots to Steam screenshot library" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
                 <CheckBox x:Name="CheckBox_SaveRightImage" Margin="5 0 5 5" Content="Also save an image for the right eye" Checked="CheckBox_SaveRightImage_Checked" Unchecked="CheckBox_SaveRightImage_Checked"/>
                 <StackPanel Orientation="Horizontal">

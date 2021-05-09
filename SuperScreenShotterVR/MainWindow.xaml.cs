@@ -175,6 +175,8 @@ namespace SuperScreenShotterVR
             CheckBox_SaveRightImage.IsChecked = _settings.SaveRightImage;
             CheckBox_CaptureTimer.IsChecked = _settings.CaptureTimer;
             TextBox_TimerSeconds.Text = _settings.TimerSeconds.ToString();
+            CheckBox_DelayCapture.IsChecked = _settings.DelayCapture;
+            TextBox_DelaySeconds.Text = _settings.DelaySeconds.ToString();
             CheckBox_SubmitToSteam.IsChecked = _settings.SubmitToSteam;
             Label_Directory.Content = _settings.Directory;
             Label_Directory.ToolTip = _settings.Directory;
@@ -279,6 +281,12 @@ namespace SuperScreenShotterVR
             _settings.Save();
             TextBox_TimerSeconds.IsEnabled = !value;
         }
+        private void CheckBox_DelayCapture_Checked(object sender, RoutedEventArgs e)
+        {
+            var value = CheckboxValue(e);
+            _settings.DelayCapture = value;
+            _settings.Save();
+        }
 
         private void CheckBox_SubmitToSteam_Checked(object sender, RoutedEventArgs e)
         {
@@ -358,8 +366,18 @@ namespace SuperScreenShotterVR
         private void TextBox_TimerSeconds_LostFocus(object sender, RoutedEventArgs e)
         {
             int.TryParse(TextBox_TimerSeconds.Text, out int result);
+            if (result < 0) result *= -1;
             _settings.TimerSeconds = result;
             TextBox_TimerSeconds.Text = result.ToString();
+            _settings.Save();
+        }
+
+        private void TextBox_Delay_LostFocus(object sender, RoutedEventArgs e)
+        {
+            int.TryParse(TextBox_DelaySeconds.Text, out int result);
+            if (result < 0) result *= -1;
+            _settings.DelaySeconds = result;
+            TextBox_DelaySeconds.Text = result.ToString();
             _settings.Save();
         }
 

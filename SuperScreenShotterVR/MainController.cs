@@ -81,7 +81,7 @@ namespace SuperScreenShotterVR
                 else
                 {
                     if (!_initComplete)
-                    {
+                    { // Initialization
                         _initComplete = true;
 
                         // Screenshots
@@ -100,25 +100,28 @@ namespace SuperScreenShotterVR
                         _ovr.LoadActionManifest("./actions.json");
                         _ovr.RegisterActionSet("/actions/screenshots");
 
-                        // TODO: After restart these do not get registered again??!!?? (maybe not a problem now as we quit and launch with SteamVR...)
-                        _ovr.RegisterDigitalAction(
-                            "/actions/screenshots/in/take_screenshot",
-                            (data, handle) => { if (data.bState && !OpenVR.Overlay.IsDashboardVisible()) TakeScreenshot(); }
-                        );
-                        _ovr.RegisterDigitalAction(
-                            "/actions/screenshots/in/show_viewfinder",
-                            (data, handle) => { ToggleViewfinder(data.bState && !OpenVR.Overlay.IsDashboardVisible()); }
-                        );
-                        _ovr.RegisterDigitalAction(
-                            "/actions/screenshots/in/take_screenshot_chord",
-                            (data, handle) => { if (data.bState && !OpenVR.Overlay.IsDashboardVisible()) TakeScreenshot(); }, 
-                            true
-                        );
-                        _ovr.RegisterDigitalAction(
-                            "/actions/screenshots/in/show_viewfinder_chord",
-                            (data, handle) => { ToggleViewfinder(data.bState && !OpenVR.Overlay.IsDashboardVisible()); },
-                            true
-                        );
+                        Action<InputDigitalActionData_t, InputActionInfo> takeScreenshotAction = (data, info) => 
+                        {
+                            var ok = data.bState && !OpenVR.Overlay.IsDashboardVisible();
+                            if (_settings.DelayCapture) TakeDelayedScreenshot(ok); else if (ok) TakeScreenshot();
+                        };
+                        Action<InputDigitalActionData_t, InputActionInfo> showViewfinderAction = (data, info) =>
+                        {
+                            var ok = data.bState && !OpenVR.Overlay.IsDashboardVisible();
+                            ToggleViewfinder(ok);
+                        };
+                        Action<InputDigitalActionData_t, InputActionInfo> takeDelayedScreenshotAction = (data, info) =>
+                        {
+                            var ok = data.bState && !OpenVR.Overlay.IsDashboardVisible();
+                            TakeDelayedScreenshot(ok);
+                        };
+                        _ovr.RegisterDigitalAction("/actions/screenshots/in/take_screenshot", takeScreenshotAction);
+                        _ovr.RegisterDigitalAction("/actions/screenshots/in/show_viewfinder", showViewfinderAction);
+                        _ovr.RegisterDigitalAction("/actions/screenshots/in/take_delayed_screenshot", takeDelayedScreenshotAction);
+                        _ovr.RegisterDigitalAction("/actions/screenshots/in/take_screenshot_chord", takeScreenshotAction, true);
+                        _ovr.RegisterDigitalAction("/actions/screenshots/in/show_viewfinder_chord", showViewfinderAction, true);
+                        _ovr.RegisterDigitalAction("/actions/screenshots/in/take_delayed_screenshot_chord", takeDelayedScreenshotAction, true);
+                        
                         _notificationOverlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
                         _currentAppId = _ovr.GetRunningApplicationId();
 
@@ -131,7 +134,10 @@ namespace SuperScreenShotterVR
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTriggered, (data) => {
                             Debug.WriteLine($"Screenshot triggered, handle: {data.data.screenshot.handle}");
-                            if (_isHookedForScreenshots) TakeScreenshot();
+                            if (_isHookedForScreenshots)
+                            {
+                                if (_settings.DelayCapture) TakeDelayedScreenshot(); else TakeScreenshot();
+                            }
                         });
                         _ovr.RegisterEvent(EVREventType.VREvent_ScreenshotTaken, (data) => {
                             Debug.WriteLine($"Screenshot taken, handle: {data.data.screenshot.handle}");
@@ -175,7 +181,7 @@ namespace SuperScreenShotterVR
                         Debug.WriteLine("Init complete.");
                     }
                     else
-                    {
+                    { // Per frame loop
                         _ovr.UpdateActionStates();
                         _ovr.UpdateEvents();
 
@@ -411,6 +417,16 @@ namespace SuperScreenShotterVR
                     _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // Will fix screenshot in progress limbo when spamming screenshots
                 }
             } else Debug.WriteLine("No application is running");
+        }
+
+        private void TakeDelayedScreenshot(bool shouldTrigger=true)
+        {
+            if(shouldTrigger)
+            {
+                ToggleViewfinder(true);
+                Thread.Sleep(_settings.DelaySeconds * 1000);
+                TakeScreenshot();
+            }
         }
 
         private void ScreenShotTaken(VREvent_Data_t eventData)
