@@ -100,7 +100,7 @@ namespace SuperScreenShotterVR
                         _ovr.LoadActionManifest("./actions.json");
                         _ovr.RegisterActionSet("/actions/screenshots");
 
-                        // TODO: After restart these do not get registered again??!!??
+                        // TODO: After restart these do not get registered again??!!?? (maybe not a problem now as we quit and launch with SteamVR...)
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/take_screenshot",
                             (data, handle) => { if (data.bState && !OpenVR.Overlay.IsDashboardVisible()) TakeScreenshot(); }
@@ -108,6 +108,16 @@ namespace SuperScreenShotterVR
                         _ovr.RegisterDigitalAction(
                             "/actions/screenshots/in/show_viewfinder",
                             (data, handle) => { ToggleViewfinder(data.bState && !OpenVR.Overlay.IsDashboardVisible()); }
+                        );
+                        _ovr.RegisterDigitalAction(
+                            "/actions/screenshots/in/take_screenshot_chord",
+                            (data, handle) => { if (data.bState && !OpenVR.Overlay.IsDashboardVisible()) TakeScreenshot(); }, 
+                            true
+                        );
+                        _ovr.RegisterDigitalAction(
+                            "/actions/screenshots/in/show_viewfinder_chord",
+                            (data, handle) => { ToggleViewfinder(data.bState && !OpenVR.Overlay.IsDashboardVisible()); },
+                            true
                         );
                         _notificationOverlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
                         _currentAppId = _ovr.GetRunningApplicationId();

@@ -127,8 +127,11 @@ namespace SuperScreenShotterVR
         protected override void OnClosing(CancelEventArgs e)
         {
             // Disengage hotkeys
-            _source.RemoveHook(HwndHook);
-            _source = null;
+            if (_source != null)
+            {
+                _source.RemoveHook(HwndHook);
+                _source = null;
+            }
             var success1 = UnregisterHotKey(HOTKEY_ID_SCREENSHOT);
             var success2 = UnregisterHotKey(HOTKEY_ID_VIEWFINDER);
             Debug.WriteLine($"Unregistering hotkeys: {success1}, {success2}");

@@ -19,6 +19,16 @@
 			"name": "/actions/screenshots/in/show_viewfinder",
 			"requirement": "optional",
 			"type": "boolean"
+		},
+		{
+			"name": "/actions/screenshots/in/take_screenshot_chord",
+			"requirement": "optional",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/screenshots/in/show_viewfinder_chord",
+			"requirement": "optional",
+			"type": "boolean"
 		}
 	],
 	"action_sets": [
@@ -32,7 +42,9 @@
 			"language_tag": "en_US",
 			"/actions/screenshots": "Screenshot Actions",
 			"/actions/screenshots/in/take_screenshot": "Take Screenshot",
-			"/actions/screenshots/in/show_viewfinder": "Show Viewfinder"
+			"/actions/screenshots/in/show_viewfinder": "Show Viewfinder",
+			"/actions/screenshots/in/take_screenshot_chord": "Take Screenshot Chord",
+			"/actions/screenshots/in/show_viewfinder_chord": "Show Viewfinder Chord"
 		}
 	]
 }

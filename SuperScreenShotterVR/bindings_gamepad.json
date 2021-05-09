@@ -3,30 +3,30 @@
    "alias_info" : {},
    "app_key" : "boll7708.superscreenshottervr",
    "bindings" : {
-      "/actions/screenshots" : {
-         "chords" : [
-            {
-               "inputs" : [
-                  [ "/user/gamepad/input/start", "click" ],
-                  [ "/user/gamepad/input/back", "click" ]
-               ],
-               "output" : "/actions/screenshots/in/take_screenshot"
-            }
-         ],
-         "sources" : [
-            {
-               "inputs" : {},
-               "mode" : "button",
-               "path" : "/user/gamepad/input/start"
-            },
-            {
-               "inputs" : {},
-               "mode" : "button",
-               "path" : "/user/gamepad/input/back"
-            }
-         ]
-      }
-   },
+	"/actions/screenshots": {
+		"chords": [],
+		"sources": [
+			{
+				"path": "/user/gamepad/input/joystick_left",
+				"mode": "button",
+				"inputs": {
+					"click": {
+						"output": "/actions/screenshots/in/show_viewfinder"
+					}
+				}
+			},
+			{
+				"path": "/user/gamepad/input/joystick_right",
+				"mode": "button",
+				"inputs": {
+					"click": {
+						"output": "/actions/screenshots/in/take_screenshot"
+					}
+				}
+			}
+		]
+	}
+},
    "category" : "steamvr_input",
    "controller_type" : "gamepad",
    "description" : "Default Gamepad Bindings",
