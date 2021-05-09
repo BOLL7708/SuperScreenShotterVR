@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuperScreenShotterVR"
         mc:Ignorable="d"
-        Title="SuperScreenShotterVR" Height="730" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
+        Title="SuperScreenShotterVR" Height="755" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
     <StackPanel Orientation="Vertical">
         <GroupBox Header="Status &amp; Help" DockPanel.Dock="Top" Background="WhiteSmoke" Margin="10">
             <StackPanel Orientation="Vertical">

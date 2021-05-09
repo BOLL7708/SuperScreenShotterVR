@@ -336,7 +336,7 @@ namespace SuperScreenShotterVR
             }
         }
 
-        public void UpdateOutputFolder(bool createDirIfNeeded=false)
+        public void UpdateOutputFolder(bool createDirIfNeeded=false, string subfolder="")
         {
             if(_settings.Directory != string.Empty)
             {
@@ -346,7 +346,11 @@ namespace SuperScreenShotterVR
                 {
                     Debug.WriteLine($"Settings subfolder to: {_currentAppId}");
                     dir = $"{dir}\\{_currentAppId}";
+                    if (subfolder != string.Empty) dir = $"{dir}\\{subfolder}";
                     if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                } else
+                {
+                    if (subfolder != string.Empty) dir = $"{dir}\\{subfolder}";
                 }
                 _ovr.SetScreenshotOutputFolder(dir);
             } else
@@ -393,13 +397,16 @@ namespace SuperScreenShotterVR
             public bool showNotification;
         }
 
+        private string _timerSubfolder = "";
         private void TakeScreenshot(bool byUser=true)
         {
             if (_currentAppId != string.Empty) // There needs to be a running application
             {
+                if(_timerSubfolder == string.Empty) _timerSubfolder = DateTime.Now.ToString("yyyyMMdd");
                 ToggleViewfinder(false);
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
-                UpdateOutputFolder(true); // Output folder
+                var subfolder = byUser ? "" : _timerSubfolder;
+                UpdateOutputFolder(true, subfolder); // Output folder
                 var success = _ovr.TakeScreenshot(out var result); // Capture
                 var data = new ScreenshotData {result=result, showNotification=byUser };
                 if (result != null)
