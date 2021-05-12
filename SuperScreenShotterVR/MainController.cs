@@ -208,12 +208,15 @@ namespace SuperScreenShotterVR
 
         internal void HotkeyViewFinder(bool visible)
         {
-            if (_initComplete) ToggleViewfinder(visible);
+            if (_initComplete) ToggleViewfinder(visible && !OpenVR.Overlay.IsDashboardVisible());
         }
 
         internal void HotkeyScreenshot()
         {
-            if(_initComplete) TakeScreenshot();
+            if (_initComplete && !OpenVR.Overlay.IsDashboardVisible())
+            {
+                if (_settings.DelayCapture) TakeDelayedScreenshot(); else TakeScreenshot();
+            }
         }
 
         private void UpdateDisplayFrequency()
