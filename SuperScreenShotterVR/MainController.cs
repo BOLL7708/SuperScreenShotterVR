@@ -11,6 +11,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Valve.VR;
 using static BOLL7708.EasyOpenVRSingleton;
+using BOLL7708.EasyCSUtils;
+using Newtonsoft.Json;
+using SuperScreenShotterVR.Remote;
 
 namespace SuperScreenShotterVR
 {
@@ -45,6 +48,8 @@ namespace SuperScreenShotterVR
         private bool _overlayIsVisible = false;
         private float _screenshotFoV = 0;
 
+        private SuperServer _server = new SuperServer(8807); // TODO: Move port to settings and add button to interface
+
         // Actions
         public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
         public Action<string> AppUpdateAction { get; set; } = (appId) => { Debug.WriteLine("No appID action set."); };
@@ -59,6 +64,34 @@ namespace SuperScreenShotterVR
 
             _workerThread = new Thread(WorkerThread);
             _workerThread.Start();
+
+            _server.MessageReceievedAction = (session, message) =>
+            {
+                var msg = new Remote.ScreenshotMessage();
+                try
+                {
+                    msg = JsonConvert.DeserializeObject<Remote.ScreenshotMessage>(message);
+                } catch(JsonReaderException e)
+                {
+                    Debug.WriteLine(e.Message);
+                    _server.SendMessage(session, "Could not parse JSON");
+                }
+                if (_initComplete && !OpenVR.Overlay.IsDashboardVisible())
+                {
+                    if(msg.nonce != string.Empty)
+                    {
+                        msg.session = session;
+                        if (msg.delaySeconds > 0) TakeDelayedScreenshot(true, msg); else TakeScreenshot(true, msg); // byUser is true as this should show viewfinder etc.
+                    }
+                }
+            };
+            _server.StatusMessageAction = (session, connected, status) =>
+            {
+                Debug.WriteLine($"Session: {session}, connected: {connected}, status: {status}");
+            };
+            _server.StatusAction = (status, count) =>
+            {
+            };
         }
 
         public void SetDebugLogAction(Action<string> action)
@@ -339,7 +372,7 @@ namespace SuperScreenShotterVR
             }
         }
 
-        public void UpdateOutputFolder(bool createDirIfNeeded=false, string subfolder="")
+        public void UpdateOutputFolder(bool createDirIfNeeded = false, string subfolder = "", string postfix = "")
         {
             if(_settings.Directory != string.Empty)
             {
@@ -398,11 +431,13 @@ namespace SuperScreenShotterVR
         private class ScreenshotData {
             public ScreenshotResult result;
             public bool showNotification;
+            public ScreenshotMessage screenshotMessage;
         }
 
         private string _timerSubfolder = "";
-        private void TakeScreenshot(bool byUser=true)
+        private uint TakeScreenshot(bool byUser = true, ScreenshotMessage screenshotMessage = null)
         {
+            uint resultHandle = 0;
             if (_currentAppId != string.Empty) // There needs to be a running application
             {
                 if(_timerSubfolder == string.Empty) _timerSubfolder = DateTime.Now.ToString("yyyyMMdd");
@@ -410,12 +445,13 @@ namespace SuperScreenShotterVR
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 var subfolder = byUser ? "" : _timerSubfolder;
                 UpdateOutputFolder(true, subfolder); // Output folder
-                var success = _ovr.TakeScreenshot(out var result); // Capture
-                var data = new ScreenshotData {result=result, showNotification=byUser };
+                var success = _ovr.TakeScreenshot(out var result, "", screenshotMessage?.userName ?? ""); // Capture
+                var data = new ScreenshotData {result = result, showNotification = byUser, screenshotMessage = screenshotMessage};
                 if (result != null)
                 {
                     _screenshotQueue.Add(result.handle, data);
                     _lastScreenshotHandle = result.handle;
+                    resultHandle = result.handle;
                 }
                 if (success && byUser)
                 {
@@ -427,15 +463,21 @@ namespace SuperScreenShotterVR
                     _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // Will fix screenshot in progress limbo when spamming screenshots
                 }
             } else Debug.WriteLine("No application is running");
+            return resultHandle;
         }
 
-        private void TakeDelayedScreenshot(bool shouldTrigger=true)
+        private void TakeDelayedScreenshot(bool shouldTrigger = true, ScreenshotMessage screenshotMessage = null)
         {
             if(shouldTrigger)
             {
                 ToggleViewfinder(true);
-                Thread.Sleep(_settings.DelaySeconds * 1000);
-                TakeScreenshot();
+                var delay = _settings.DelaySeconds;
+                if(screenshotMessage != null && screenshotMessage.delaySeconds > 0)
+                {
+                    delay = screenshotMessage.delaySeconds;
+                }
+                Thread.Sleep(delay * 1000);
+                TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
             }
         }
 
@@ -462,18 +504,24 @@ namespace SuperScreenShotterVR
 
                     if(_settings.SaveRightImage && File.Exists(filePathVR))
                     {
-                        var bitmap = GetRightEyeBitmap(rect, filePathVR);
-                        SaveBitmapToPngFile(bitmap, filePathR);
+                        var bitmapR = GetRightEyeBitmap(rect, filePathVR);
+                        SaveBitmapToPngFile(bitmapR, filePathR);
                     }
 
+                    var image = Image.FromFile(filePath);
+                    var bitmap = ResizeImage(image, 512, 512); // 256x256 should be enough for notification, but we do 512x512 for the remote response.
+                    SetAlpha(ref bitmap, 255);
+                    if(data.screenshotMessage != null)
+                    {
+                        var msg = data.screenshotMessage;
+                        var imgb64data = GetBase64Bytes(bitmap);
+                        _server.SendMessage(msg.session, JsonConvert.SerializeObject(new ScreenshotResponse { userName = msg.userName, nonce = msg.nonce, image = imgb64data }));
+                    }
+                    
                     if (_settings.Notifications && _settings.Thumbnail)
                     {
-                        var image = Image.FromFile(filePath);
-                        var bitmap = ResizeImage(image, 256, 256); // Increasing this does not seem to make for a nicer icon.
-                        SetAlpha(ref bitmap, 255);
                         notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap);
-                    } else
-                    {
+                    } else {
                         notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(Properties.Resources.logo);
                     }
                 } else
@@ -588,6 +636,17 @@ namespace SuperScreenShotterVR
                 line += data.Stride;
             }
             bmp.UnlockBits(data);
+        }
+
+        // https://stackoverflow.com/a/41578098
+        public static string GetBase64Bytes(Bitmap bmp)
+        {
+            using (var ms = new MemoryStream())
+            {
+                bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                var b64 = Convert.ToBase64String(ms.GetBuffer());
+                return b64;
+            }
         }
     }
 }
