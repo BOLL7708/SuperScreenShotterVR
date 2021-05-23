@@ -30,6 +30,25 @@ This is an overlay that is shown when a specific input is triggered, the app onl
 
 The outer frame shows the approximate crop of the screenshot. The roll indicator helps you  level with the horizon, and the pitch indicator helps you get vertical lines in architecture.
 
+## Remote Server
+When enabling the server it is possible to send and receive requests to and from the application. Namely, you can trigger screenshot taking and get the results back, including tagging the stored files. Below are the payload specifications, both requests and response are JSON encoded.
+
+Send this to the server on the port defined, default address is `ws://localhost:8807`, which you can try from [here](https://www.websocket.org/echo.html). The delay is in whole seconds, and if enabled, the viewfinder will be shown during the delay just as with the manual delayed shots.
+```js
+{
+  "nonce": "your-identifier",
+  "tag": "tag-the-files",
+  "delay": 2
+}
+```
+On the same connection you will get these responses containing the result, the image is a Base64 encoded .PNG image.
+```js
+{
+  "nonce": "your-identifier",
+  "image": "base64-encoded-png-image"
+}
+```
+
 ## Customization
 The overlay graphics can be customized by overwriting the images in the resources folder. Right now screenshot output is assumed to be square, so the viewfinder border is square as well. With the way overlays work we set the size of the overlay to be the width of the screenshot field of view. Images are limited to a maximum of 1920x1080 in resolution by SteamVR.
 
