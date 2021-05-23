@@ -38,11 +38,11 @@ namespace BOLL7708.EasyCSUtils
         public SuperServer(int port = 0)
         {
             ResetActions();
-            if (port != 0) Start(port);
+            if (port != 0) StartOrRestart(port);
         }
 
         #region Manage
-        public void Start(int port)
+        public void StartOrRestart(int port)
         {
             // Stop in case of already running
             Stop();
@@ -56,7 +56,6 @@ namespace BOLL7708.EasyCSUtils
             };
             _server = new WebSocketServer();
             _server.Setup(config);
-            // _server.Setup(port);
             _server.NewSessionConnected += Server_NewSessionConnected;
             _server.NewMessageReceived += Server_NewMessageReceived;
             _server.NewDataReceived += Server_NewDataReceived;

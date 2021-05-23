@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuperScreenShotterVR"
         mc:Ignorable="d"
-        Title="SuperScreenShotterVR" Height="755" Width="400" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
+        Title="SuperScreenShotterVR" Height="845" Width="420" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
     <StackPanel Orientation="Vertical">
         <GroupBox Header="Status &amp; Help" DockPanel.Dock="Top" Background="WhiteSmoke" Margin="10">
             <StackPanel Orientation="Vertical">
@@ -42,6 +42,24 @@
                     <CheckBox VerticalAlignment="Center" x:Name="CheckBox_ReplaceShortcut" Margin="5 6 5 5" Content="Replace SteamVR screenshot function" Checked="CheckBox_ReplaceShortcut_Checked" Unchecked="CheckBox_ReplaceShortcut_Checked"/>
                     <Button x:Name="Button_RehookShortcut" Content="Replace again" Padding="4" Click="Button_RehookShortcut_Click"/>
                 </StackPanel>
+
+                <CheckBox x:Name="CheckBox_EnableServer" Content="Enable remote control WebSocket server" Checked="CheckBox_EnableServer_Checked" Unchecked="CheckBox_EnableServer_Checked" Margin="5"/>
+                <CheckBox x:Name="CheckBox_AddTag" Content="Add incoming tag to output filenames" Checked="CheckBox_AddTag_Checked" Unchecked="CheckBox_AddTag_Checked" Margin="15 0 5 5"/>
+                <CheckBox x:Name="CheckBox_TransmitAll" Content="Respond with manual shots in addition to remote ones" Checked="CheckBox_TransmitAll_Checked" Unchecked="CheckBox_TransmitAll_Checked" Margin="15 0 5 5"/>
+
+                <StackPanel Orientation="Horizontal" Margin="15 0 5 5">
+                    <Label Content="Server port:"></Label>
+                    <TextBox x:Name="TextBox_ServerPort" IsEnabled="False" Text="0000" VerticalAlignment="Center" Padding="0 4" Margin="0 0 5 0"></TextBox>
+                    <Button x:Name="Button_SetServerPort" Content="Set port" Padding="4" Click="Button_SetServerPort_Click"></Button>
+                    <Label Content="Response resolution:"></Label>
+                    <ComboBox x:Name="ComboBox_ResponseResolution" SelectionChanged="ComboBox_ResponseResolution_SelectionChanged">
+                        <ComboBoxItem>128px</ComboBoxItem>
+                        <ComboBoxItem>256px</ComboBoxItem>
+                        <ComboBoxItem>512px</ComboBoxItem>
+                        <ComboBoxItem>1024px</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+
             </StackPanel>
         </GroupBox>
         <GroupBox Header="Capture &amp; Output" DockPanel.Dock="Top" Background="Linen" Margin="10 0 10 10">

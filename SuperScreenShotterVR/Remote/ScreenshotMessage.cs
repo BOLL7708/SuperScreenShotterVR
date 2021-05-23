@@ -9,8 +9,8 @@ namespace SuperScreenShotterVR.Remote
     class ScreenshotMessage
     {
         public string nonce = "";
-        public int delaySeconds = 0;
-        public string userName = "";
+        public int delay = 0;
+        public string tag = "";
         public SuperSocket.WebSocket.WebSocketSession session = null;
     }
 }

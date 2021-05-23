@@ -48,7 +48,7 @@ namespace SuperScreenShotterVR
         private bool _overlayIsVisible = false;
         private float _screenshotFoV = 0;
 
-        private SuperServer _server = new SuperServer(8807); // TODO: Move port to settings and add button to interface
+        private SuperServer _server = new SuperServer();
 
         // Actions
         public Action<bool> StatusUpdateAction { get; set; } = (status) => { Debug.WriteLine("No status action set."); };
@@ -65,6 +65,10 @@ namespace SuperScreenShotterVR
             _workerThread = new Thread(WorkerThread);
             _workerThread.Start();
 
+            if(_settings.EnableServer && _settings.ServerPort != 0)
+            {
+                _server.StartOrRestart(_settings.ServerPort);
+            }
             _server.MessageReceievedAction = (session, message) =>
             {
                 var msg = new Remote.ScreenshotMessage();
@@ -81,7 +85,7 @@ namespace SuperScreenShotterVR
                     if(msg.nonce != string.Empty)
                     {
                         msg.session = session;
-                        if (msg.delaySeconds > 0) TakeDelayedScreenshot(true, msg); else TakeScreenshot(true, msg); // byUser is true as this should show viewfinder etc.
+                        if (msg.delay > 0) TakeDelayedScreenshot(true, msg); else TakeScreenshot(true, msg); // byUser is true as this should show viewfinder etc.
                     }
                 }
             };
@@ -363,6 +367,12 @@ namespace SuperScreenShotterVR
             }
         }
 
+        internal void UpdateServer()
+        {
+            if (_settings.EnableServer) _server.StartOrRestart(_settings.ServerPort);
+            else _server.Stop();
+        }
+        
         public void UpdateScreenshotHook(bool force = false)
         {
             if(_ovr.IsInitialized() && _settings.ReplaceShortcut && (force || !_isHookedForScreenshots))
@@ -445,7 +455,8 @@ namespace SuperScreenShotterVR
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 var subfolder = byUser ? "" : _timerSubfolder;
                 UpdateOutputFolder(true, subfolder); // Output folder
-                var success = _ovr.TakeScreenshot(out var result, "", screenshotMessage?.userName ?? ""); // Capture
+                var tag = _settings.AddTag ? (screenshotMessage?.tag ?? "") : "";
+                var success = _ovr.TakeScreenshot(out var result, "", tag); // Capture
                 var data = new ScreenshotData {result = result, showNotification = byUser, screenshotMessage = screenshotMessage};
                 if (result != null)
                 {
@@ -472,9 +483,9 @@ namespace SuperScreenShotterVR
             {
                 ToggleViewfinder(true);
                 var delay = _settings.DelaySeconds;
-                if(screenshotMessage != null && screenshotMessage.delaySeconds > 0)
+                if(screenshotMessage != null && screenshotMessage.delay > 0)
                 {
-                    delay = screenshotMessage.delaySeconds;
+                    delay = screenshotMessage.delay;
                 }
                 Thread.Sleep(delay * 1000);
                 TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
@@ -500,7 +511,11 @@ namespace SuperScreenShotterVR
                     {
                         var submitted = _ovr.SubmitScreenshotToSteam(result);
                         Debug.WriteLine($"Managed to submit the screenshot to Steam: {submitted}");
-                    } else Debug.WriteLine("Will not submit the screenshot to Steam.");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Will not submit the screenshot to Steam.");
+                    }
 
                     if(_settings.SaveRightImage && File.Exists(filePathVR))
                     {
@@ -509,31 +524,60 @@ namespace SuperScreenShotterVR
                     }
 
                     var image = Image.FromFile(filePath);
-                    var bitmap = ResizeImage(image, 512, 512); // 256x256 should be enough for notification, but we do 512x512 for the remote response.
-                    SetAlpha(ref bitmap, 255);
-                    if(data.screenshotMessage != null)
+                    var msg = data.screenshotMessage;
+                    if (msg != null || _settings.TransmitAll)
                     {
-                        var msg = data.screenshotMessage;
+                        var resIndex = _settings.ResponseResolution;
+                        var res = MainWindow.RES_MAP.Length > resIndex ? MainWindow.RES_MAP[resIndex] : 256;
+                        var bitmap = ResizeImage(image, res, res);
+                        SetAlpha(ref bitmap, 255);
                         var imgb64data = GetBase64Bytes(bitmap);
-                        _server.SendMessage(msg.session, JsonConvert.SerializeObject(new ScreenshotResponse { userName = msg.userName, nonce = msg.nonce, image = imgb64data }));
+                        if (msg != null)
+                        {
+                            _server.SendMessage(
+                                msg.session,
+                                JsonConvert.SerializeObject(new ScreenshotResponse
+                                {
+                                    nonce = msg.nonce,
+                                    image = imgb64data
+                                })
+                            );
+                        }
+                        else
+                        {
+                            _server.SendMessageToAll(
+                                JsonConvert.SerializeObject(new ScreenshotResponse
+                                {
+                                    nonce = "",
+                                    image = imgb64data
+                                })
+                            );
+                        }
                     }
-                    
+
                     if (_settings.Notifications && _settings.Thumbnail)
                     {
+                        var bitmap = ResizeImage(image, 255, 255); // 256x256 should be enough for notification
+                        SetAlpha(ref bitmap, 255);
                         notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(bitmap);
-                    } else {
+                    } 
+                    else 
+                    {
                         notificationBitmap = BitmapUtils.NotificationBitmapFromBitmap(Properties.Resources.logo);
                     }
-                } else
+                } 
+                else
                 {
                     Debug.WriteLine($"Could not find screenshot after taking it: {filePath}");
                 }
+
                 if (_settings.Notifications && data.showNotification)
                 {
                     _ovr.EnqueueNotification(_notificationOverlayHandle, $"Screenshot taken!\n{rect.Width}x{rect.Height}px", notificationBitmap);
                 }
                 _screenshotQueue.Remove(handle);
-            } else
+            } 
+            else
             {
                 if (_settings.Notifications)
                 {

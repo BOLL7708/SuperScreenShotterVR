@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using BOLL7708;
+using BOLL7708.EasyCSUtils;
 using Valve;
 using Valve.VR;
 
@@ -200,6 +201,11 @@ namespace SuperScreenShotterVR
             CheckBox_LaunchMinimized.IsChecked = _settings.LaunchMinimized;
             CheckBox_Tray.IsChecked = _settings.Tray;
             CheckBox_ExitWithSteamVR.IsChecked = _settings.ExitWithSteamVR;
+            CheckBox_EnableServer.IsChecked = _settings.EnableServer;
+            CheckBox_AddTag.IsChecked = _settings.AddTag;
+            CheckBox_TransmitAll.IsChecked = _settings.TransmitAll;
+            TextBox_ServerPort.Text = _settings.ServerPort.ToString();
+            ComboBox_ResponseResolution.SelectedIndex = _settings.ResponseResolution;
 
             Slider_OverlayDistance.Value = _settings.OverlayDistanceGui;
             Slider_OverlayOpacity.Value = _settings.OverlayOpacity;
@@ -428,6 +434,46 @@ namespace SuperScreenShotterVR
             _settings.Save();
         }
 
+        private void CheckBox_EnableServer_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.EnableServer = CheckboxValue(e);
+            _settings.Save();
+            _controller.UpdateServer();
+        }
+        private void CheckBox_AddTag_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.AddTag = CheckboxValue(e);
+            _settings.Save();
+        }
+        private void CheckBox_TransmitAll_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.TransmitAll = CheckboxValue(e);
+            _settings.Save();
+        }
+        private void Button_SetServerPort_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new InputDialog(this, "Set Server Port", "Server port", _settings.ServerPort.ToString());
+            var result = dialog.ShowDialog();
+            if(result == true)
+            {
+                if(Int32.TryParse(dialog.value, out int port))
+                {
+                    TextBox_ServerPort.Text = dialog.value;
+                    if(_settings.ServerPort != port)
+                    {
+                        _settings.ServerPort = port;
+                        _settings.Save();
+                        _controller.UpdateServer();
+                    }
+                }
+            }
+        }
+        private void ComboBox_ResponseResolution_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _settings.ResponseResolution = ComboBox_ResponseResolution.SelectedIndex;
+            _settings.Save();
+        }
+
         private void CheckBox_SaveRightImage_Checked(object sender, RoutedEventArgs e)
         {
             _settings.SaveRightImage = CheckboxValue(e);
@@ -469,6 +515,12 @@ namespace SuperScreenShotterVR
             _settings.Save();
             UpdateHotkey(HOTKEY_ID_SCREENSHOT);
         }
+        public static readonly int[] RES_MAP = {
+            128,
+            256,
+            512,
+            1024
+        };
 
         private void CheckBox_ViewfinderHotkeyAlt_Checked(object sender, RoutedEventArgs e)
         {
