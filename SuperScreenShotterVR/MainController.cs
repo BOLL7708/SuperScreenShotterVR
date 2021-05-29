@@ -440,7 +440,7 @@ namespace SuperScreenShotterVR
 
         private class ScreenshotData {
             public ScreenshotResult result;
-            public bool showNotification;
+            public bool byUser;
             public ScreenshotMessage screenshotMessage;
         }
 
@@ -457,7 +457,7 @@ namespace SuperScreenShotterVR
                 UpdateOutputFolder(true, subfolder); // Output folder
                 var tag = _settings.AddTag ? (screenshotMessage?.tag ?? "") : "";
                 var success = _ovr.TakeScreenshot(out var result, "", tag); // Capture
-                var data = new ScreenshotData {result = result, showNotification = byUser, screenshotMessage = screenshotMessage};
+                var data = new ScreenshotData {result = result, byUser = byUser, screenshotMessage = screenshotMessage};
                 if (result != null)
                 {
                     _screenshotQueue.Add(result.handle, data);
@@ -543,7 +543,7 @@ namespace SuperScreenShotterVR
                                 })
                             );
                         }
-                        else
+                        else if(data.byUser)
                         {
                             _server.SendMessageToAll(
                                 JsonConvert.SerializeObject(new ScreenshotResponse
@@ -571,7 +571,7 @@ namespace SuperScreenShotterVR
                     Debug.WriteLine($"Could not find screenshot after taking it: {filePath}");
                 }
 
-                if (_settings.Notifications && data.showNotification)
+                if (_settings.Notifications && data.byUser)
                 {
                     _ovr.EnqueueNotification(_notificationOverlayHandle, $"Screenshot taken!\n{rect.Width}x{rect.Height}px", notificationBitmap);
                 }
