@@ -276,8 +276,8 @@ namespace SuperScreenShotterVR
             _reticleOverlayHandle = _ovr.FindOverlay(RETICLE_OVERLAY_UNIQUE_KEY);
 
             if (_viewfinderOverlayHandle == 0) _viewfinderOverlayHandle = CreateOverlay("viewfinder", VIEWFINDER_OVERLAY_UNIQUE_KEY, "SSSVRVF");
-            if(_rollIndicatorOverlayHandle == 0) _rollIndicatorOverlayHandle = CreateOverlay("rollindicator", ROLL_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRRI");
-            if(_pitchIndicatorOverlayHandle == 0) _pitchIndicatorOverlayHandle = CreateOverlay("pitchindicator", PITCH_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRPI");
+            if (_rollIndicatorOverlayHandle == 0) _rollIndicatorOverlayHandle = CreateOverlay("rollindicator", ROLL_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRRI");
+            if (_pitchIndicatorOverlayHandle == 0) _pitchIndicatorOverlayHandle = CreateOverlay("pitchindicator", PITCH_INDICATOR_OVERLAY_UNIQUE_KEY, "SSSVRPI");
             if (_reticleOverlayHandle == 0) _reticleOverlayHandle = CreateOverlay("reticle", RETICLE_OVERLAY_UNIQUE_KEY, "SSSVRR");
             UpdateOverlays();
 
@@ -315,27 +315,35 @@ namespace SuperScreenShotterVR
                 // Pose & orientation
                 var pose = poses[_trackedDeviceIndex];
                 var hmdTransform = pose.mDeviceToAbsoluteTracking;
-                var YPR = EasyOpenVRSingleton.Utils.RotationMatrixToYPR(hmdTransform);
+                var YPR = new YPR(hmdTransform.EulerAngles());
 
                 // Static overlay
-                var overlayTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform();
-                overlayTransform.m11 = -distance;
-                
-                // Pitch indicator
-                var pitchTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform();
-                var pitchY = (float) -YPR.pitch * distance; // Y-pos, somehow this works
-                var reticleSizeFactor = _settings.ReticleSize / 100;
-                var limitY = width * reticleSizeFactor / 2 / _reticleTextureSize.aspectRatio;
-                if (pitchY > limitY) pitchY = limitY;
-                if (pitchY < -limitY) pitchY = -limitY;
-                pitchTransform.m7 = pitchY;
-                pitchTransform.m11 = -distance;
+                var overlayTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform().Translate(new HmdVector3_t() { v2 = -distance });
 
                 // Roll indicator
-                var rollYPR = new YPR { yaw = 0, pitch = 0, roll = -YPR.roll };
-                var rollTransform = EasyOpenVRSingleton.Utils.GetTransformFromEuler(rollYPR);
-                rollTransform.m11 = -distance;
-               
+                var rollTransform = overlayTransform.RotateZ(-YPR.roll, false);
+
+                // Pitch indicator
+                var reticleSizeFactor = _settings.ReticleSize / 100;
+                var limitY = width * reticleSizeFactor / 2 / _reticleTextureSize.aspectRatio;
+
+                var pitchTransform = new HmdMatrix34_t();
+                float pitchY = (float)(distance * Math.Tan(-YPR.pitch));
+                
+                if(true) // TODO: Make this a setting for limiting to reticle bounding box
+                {
+                    if (pitchY > limitY) pitchY = limitY;
+                    if (pitchY < -limitY) pitchY = -limitY;
+                }
+                if (false) // TODO: Make this a setting for locking pitch indicator to horizon
+                {
+                    pitchTransform = overlayTransform.Translate(new HmdVector3_t() { v1 = pitchY });
+                }
+                else
+                {                    
+                    pitchTransform = rollTransform.Translate(new HmdVector3_t() { v1 = pitchY });
+                }
+
                 // Update
                 if (_ovr.FindOverlay(VIEWFINDER_OVERLAY_UNIQUE_KEY) != 0)
                 {
