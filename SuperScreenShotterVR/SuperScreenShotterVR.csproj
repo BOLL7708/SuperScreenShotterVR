@@ -191,6 +191,9 @@
     <EmbeddedResource Include="costura64\openvr_api.dll" />
     <Resource Include="resources\logo.ico" />
     <Resource Include="resources\logo.png" />
+    <Content Include="example_discord_pipe.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="resources\pitchindicator.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
