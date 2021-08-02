@@ -537,6 +537,7 @@ namespace SuperScreenShotterVR
                     {
                         var resIndex = _settings.ResponseResolution;
                         var res = MainWindow.RES_MAP.Length > resIndex ? MainWindow.RES_MAP[resIndex] : 256;
+                        if (res < 0) res = image.Width;
                         var bitmap = ResizeImage(image, res, res);
                         SetAlpha(ref bitmap, 255);
                         var imgb64data = GetBase64Bytes(bitmap);

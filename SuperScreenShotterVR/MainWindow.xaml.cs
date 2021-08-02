@@ -519,7 +519,8 @@ namespace SuperScreenShotterVR
             128,
             256,
             512,
-            1024
+            1024,
+            -1
         };
 
         private void CheckBox_ViewfinderHotkeyAlt_Checked(object sender, RoutedEventArgs e)

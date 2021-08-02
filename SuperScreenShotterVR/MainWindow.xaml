@@ -57,6 +57,7 @@
                         <ComboBoxItem>256px</ComboBoxItem>
                         <ComboBoxItem>512px</ComboBoxItem>
                         <ComboBoxItem>1024px</ComboBoxItem>
+                        <ComboBoxItem>Original</ComboBoxItem>
                     </ComboBox>
                 </StackPanel>
 
