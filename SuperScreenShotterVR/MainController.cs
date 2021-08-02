@@ -330,12 +330,12 @@ namespace SuperScreenShotterVR
                 var pitchTransform = new HmdMatrix34_t();
                 float pitchY = (float)(distance * Math.Tan(-YPR.pitch));
                 
-                if(true) // TODO: Make this a setting for limiting to reticle bounding box
+                if (_settings.RestrictToBox)
                 {
                     if (pitchY > limitY) pitchY = limitY;
                     if (pitchY < -limitY) pitchY = -limitY;
                 }
-                if (false) // TODO: Make this a setting for locking pitch indicator to horizon
+                if (_settings.LockHorizon)
                 {
                     pitchTransform = overlayTransform.Translate(new HmdVector3_t() { v1 = pitchY });
                 }

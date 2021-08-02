@@ -430,5 +430,29 @@ namespace SuperScreenShotterVR.Properties {
                 this["ServerPort"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool RestrictToBox {
+            get {
+                return ((bool)(this["RestrictToBox"]));
+            }
+            set {
+                this["RestrictToBox"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LockHorizon {
+            get {
+                return ((bool)(this["LockHorizon"]));
+            }
+            set {
+                this["LockHorizon"] = value;
+            }
+        }
     }
 }
