@@ -308,6 +308,7 @@ namespace SuperScreenShotterVR
             {
                 // From settings and device values
                 var alpha = _settings.OverlayOpacity / 100f;
+                var alphaHalf = alpha / 2f;
                 var distance = _settings.OverlayDistance;
                 var fov = _screenshotFoV;
                 var width = (float)Math.Tan(fov / 2f * Math.PI / 180) * distance * 2;
@@ -327,8 +328,12 @@ namespace SuperScreenShotterVR
                 var reticleSizeFactor = _settings.ReticleSize / 100;
                 var limitY = width * reticleSizeFactor / 2 / _reticleTextureSize.aspectRatio;
 
-                var pitchTransform = new HmdMatrix34_t();
-                float pitchY = (float)(distance * Math.Tan(-YPR.pitch));
+                HmdMatrix34_t pitchTransform;
+                double pitchYDeg = YPR.pitch * 180.0 / Math.PI;
+                var pitchYIsNegative = YPR.pitch < 0;
+                double pitchYDegMod = (Math.Abs(pitchYDeg) +22.5) % 45 - 22.5;
+                if (pitchYIsNegative) pitchYDegMod *= -1.0;
+                float pitchY = (float)(distance * Math.Tan(-(pitchYDegMod/180.0*Math.PI)));
                 
                 if (_settings.RestrictToBox)
                 {
@@ -337,11 +342,11 @@ namespace SuperScreenShotterVR
                 }
                 if (_settings.LockHorizon)
                 {
-                    pitchTransform = overlayTransform.Translate(new HmdVector3_t() { v1 = pitchY });
+                    pitchTransform = rollTransform.Translate(new HmdVector3_t() { v1 = pitchY });
                 }
                 else
                 {                    
-                    pitchTransform = rollTransform.Translate(new HmdVector3_t() { v1 = pitchY });
+                    pitchTransform = overlayTransform.Translate(new HmdVector3_t() { v1 = pitchY });
                 }
 
                 // Update
@@ -357,17 +362,24 @@ namespace SuperScreenShotterVR
                     _ovr.SetOverlayTransform(_reticleOverlayHandle, overlayTransform, _trackedDeviceIndex);
                     _ovr.SetOverlayAlpha(_reticleOverlayHandle, alpha);
                 }
+
                 if (_ovr.FindOverlay(PITCH_INDICATOR_OVERLAY_UNIQUE_KEY) != 0)
                 {
+                    var pitchNearLimit = 7.0;
+                    var pitchNearDeg = Math.Abs(Math.Round(YPR.pitch * (180.0 * pitchNearLimit) / Math.PI)) % (45.0 * pitchNearLimit) == 0;
+                    var pitchAlpha = (_settings.IndicateDegrees && !pitchNearDeg) ? alphaHalf : alpha;
                     _ovr.SetOverlayWidth(_pitchIndicatorOverlayHandle, width * reticleSizeFactor);
                     _ovr.SetOverlayTransform(_pitchIndicatorOverlayHandle, pitchTransform, _trackedDeviceIndex);
-                    _ovr.SetOverlayAlpha(_pitchIndicatorOverlayHandle, alpha);
+                    _ovr.SetOverlayAlpha(_pitchIndicatorOverlayHandle, pitchAlpha);
                 }
                 if (_ovr.FindOverlay(ROLL_INDICATOR_OVERLAY_UNIQUE_KEY) != 0)
                 {
+                    var rollNearLimit = 2.0;
+                    var rollNearDeg = Math.Abs(Math.Round(YPR.roll * (180.0 * rollNearLimit) / Math.PI)) % (45.0 * rollNearLimit) == 0;
+                    var rollAlpha = (_settings.IndicateDegrees && !rollNearDeg) ? alphaHalf : alpha;
                     _ovr.SetOverlayWidth(_rollIndicatorOverlayHandle, width * reticleSizeFactor);
                     _ovr.SetOverlayTransform(_rollIndicatorOverlayHandle, rollTransform, _trackedDeviceIndex);
-                    _ovr.SetOverlayAlpha(_rollIndicatorOverlayHandle, alpha);
+                    _ovr.SetOverlayAlpha(_rollIndicatorOverlayHandle, rollAlpha);
                 }
             } else
             {

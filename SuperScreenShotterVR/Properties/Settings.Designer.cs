@@ -454,5 +454,17 @@ namespace SuperScreenShotterVR.Properties {
                 this["LockHorizon"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IndicateDegrees {
+            get {
+                return ((bool)(this["IndicateDegrees"]));
+            }
+            set {
+                this["IndicateDegrees"] = value;
+            }
+        }
     }
 }

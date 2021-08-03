@@ -158,6 +158,8 @@
                     <CheckBox x:Name="CheckBox_ViewFinder" Margin="5" Content="Enable viewfinder overlay in headset (binding)" Checked="CheckBox_ViewFinder_Checked" Unchecked="CheckBox_ViewFinder_Checked"/>
                     <CheckBox x:Name="CheckBox_RestrictToBox" Margin="5" Content="Lock vertical indicator to indicator box" Checked="CheckBox_RestrictToBox_Checked" Unchecked="CheckBox_RestrictToBox_Checked"/>
                     <CheckBox x:Name="CheckBox_LockHorizon" Margin="5" Content="Lock the angle of the vertical indicator to the horizon" Checked="CheckBox_LockHorizon_Checked" Unchecked="CheckBox_LockHorizon_Checked"/>
+                    <CheckBox x:Name="CheckBox_IndicateDegrees" Margin="5" Content="Indicate every 45 degrees" Checked="CheckBox_IndicateDegrees_Checked" Unchecked="CheckBox_IndicateDegrees_Checked"/>
+                    
                     <DockPanel LastChildFill="True">
                         <Label Content="Distance: " Padding="5 5 0 5"/>
                         <Label x:Name="Label_OverlayDistance" Content="100m" Padding="0 5 5 5" MinWidth="40"/>

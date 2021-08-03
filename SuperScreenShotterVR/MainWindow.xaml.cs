@@ -175,6 +175,7 @@ namespace SuperScreenShotterVR
             CheckBox_ViewFinder.IsChecked = _settings.ViewFinder;
             CheckBox_RestrictToBox.IsChecked = _settings.RestrictToBox;
             CheckBox_LockHorizon.IsChecked = _settings.LockHorizon;
+            CheckBox_IndicateDegrees.IsChecked = _settings.IndicateDegrees;
             CheckBox_SaveRightImage.IsChecked = _settings.SaveRightImage;
             CheckBox_CaptureTimer.IsChecked = _settings.CaptureTimer;
             TextBox_TimerSeconds.Text = _settings.TimerSeconds.ToString();
@@ -291,6 +292,12 @@ namespace SuperScreenShotterVR
         private void CheckBox_LockHorizon_Checked(object sender, RoutedEventArgs e)
         {
             _settings.LockHorizon = CheckboxValue(e);
+            _settings.Save();
+        }
+
+        private void CheckBox_IndicateDegrees_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.IndicateDegrees = CheckboxValue(e);
             _settings.Save();
         }
 
