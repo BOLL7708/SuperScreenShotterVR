@@ -10,5 +10,7 @@ namespace SuperScreenShotterVR.Remote
     {
         public string nonce = "";
         public string image = "";
+        public int width = 0;
+        public int height = 0;
     }
 }

@@ -560,7 +560,9 @@ namespace SuperScreenShotterVR
                                 JsonConvert.SerializeObject(new ScreenshotResponse
                                 {
                                     nonce = msg.nonce,
-                                    image = imgb64data
+                                    image = imgb64data,
+                                    width = image.Width,
+                                    height = image.Height
                                 })
                             );
                         }
@@ -570,7 +572,9 @@ namespace SuperScreenShotterVR
                                 JsonConvert.SerializeObject(new ScreenshotResponse
                                 {
                                     nonce = "",
-                                    image = imgb64data
+                                    image = imgb64data,
+                                    width = image.Width,
+                                    height = image.Height
                                 })
                             );
                         }
