@@ -31,14 +31,8 @@
     <None Update="bindings_knuckles.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="FodyWeavers.xsd">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="FodyWeavers.xml" />
-    <EmbeddedResource Include="costura32\openvr_api.dll" />
-    <EmbeddedResource Include="costura64\openvr_api.dll" />
     <Resource Include="resources\logo.ico" />
     <Resource Include="resources\logo.png" />
     <Content Include="example_discord_pipe.html">
@@ -61,12 +55,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="5.7.0" />
-    <PackageReference Include="Fody" Version="6.0.0" />
-    <PackageReference Include="log4net" Version="2.0.12" />
+    <ProjectReference Include="..\EasyOpenVR\EasyOpenVR.csproj" />
+    <ProjectReference Include="..\EasyFramework\EasyFramework.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SystemWebAdapters" Version="1.3.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
   </ItemGroup>
 </Project>

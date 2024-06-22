@@ -8,9 +8,9 @@ namespace SuperScreenShotterVR.Remote
 {
     class ScreenshotResponse
     {
-        public string nonce = "";
-        public string image = "";
-        public int width = 0;
-        public int height = 0;
+        public string Nonce = "";
+        public string Image = "";
+        public int Width = 0;
+        public int Height = 0;
     }
 }

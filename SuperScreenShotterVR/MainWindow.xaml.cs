@@ -1,39 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Runtime.Versioning;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using BOLL7708;
-using BOLL7708.EasyCSUtils;
-using Valve;
-using Valve.VR;
+using EasyFramework;
+using SuperScreenShotterVR.Properties;
+using Application = System.Windows.Application;
+using Brushes = System.Windows.Media.Brushes;
+using MessageBox = System.Windows.MessageBox;
 
 namespace SuperScreenShotterVR
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    [SupportedOSPlatform("windows7.0")]
     public partial class MainWindow : Window
     {
         private MainController _controller = new MainController();
-        private Properties.Settings _settings = Properties.Settings.Default;
-        private System.Windows.Forms.NotifyIcon _notifyIcon;
+        private Settings _settings = Settings.Default;
+        private NotifyIcon _notifyIcon;
         private static Mutex _mutex = null;
         private bool _settingsLoaded = false;
         private bool _viewfinderOn = false;
@@ -55,14 +50,14 @@ namespace SuperScreenShotterVR
             _mutex = new Mutex(true, Properties.Resources.AppName, out bool createdNew);
             if (!createdNew)
             {
-                System.Windows.MessageBox.Show(
-                System.Windows.Application.Current.MainWindow,
+                MessageBox.Show(
+                Application.Current.MainWindow,
                 "This application is already running!",
                 Properties.Resources.AppName,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information
                 );
-                System.Windows.Application.Current.Shutdown();
+                Application.Current.Shutdown();
             }
 
             InitSettings();
@@ -71,7 +66,7 @@ namespace SuperScreenShotterVR
                 Dispatcher.Invoke(() =>
                 {
                     Label_Status.Content = status ? "Connected" : "Disconnected";
-                    Label_Status.Background = status ? System.Windows.Media.Brushes.OliveDrab : System.Windows.Media.Brushes.Tomato;
+                    Label_Status.Background = status ? Brushes.OliveDrab : Brushes.Tomato;
                 });
             };
             _controller.AppUpdateAction = (appId) =>
@@ -80,7 +75,7 @@ namespace SuperScreenShotterVR
                 Dispatcher.Invoke(() =>
                 {
                     Label_AppId.Content = appIdFixed != string.Empty ? appIdFixed : "None";
-                    Label_AppId.Background = appIdFixed != string.Empty ? System.Windows.Media.Brushes.OliveDrab : System.Windows.Media.Brushes.Gray;
+                    Label_AppId.Background = appIdFixed != string.Empty ? Brushes.OliveDrab : Brushes.Gray;
                 });
             };
             _controller.ExitAction = () =>
@@ -100,8 +95,8 @@ namespace SuperScreenShotterVR
             });
             _controller.Init();
 
-            var icon = Properties.Resources.app_logo as System.Drawing.Icon;
-            _notifyIcon = new System.Windows.Forms.NotifyIcon();
+            var icon = Properties.Resources.app_logo as Icon;
+            _notifyIcon = new NotifyIcon();
             _notifyIcon.Click += NotifyIcon_Click;
             _notifyIcon.Text = $"Click to show the {Properties.Resources.AppName} window";
             _notifyIcon.Icon = icon;
@@ -220,7 +215,7 @@ namespace SuperScreenShotterVR
 
         private void ExitApplication() {
             if (_notifyIcon != null) _notifyIcon.Dispose();
-            System.Windows.Application.Current.Shutdown();
+            Application.Current.Shutdown();
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -228,21 +223,21 @@ namespace SuperScreenShotterVR
             base.OnSourceInitialized(e);
             var helper = new WindowInteropHelper(this);
             _source = HwndSource.FromHwnd(helper.Handle);
-            _source.AddHook(HwndHook);
+            _source?.AddHook(HwndHook);
             UpdateHotkey(HOTKEY_ID_SCREENSHOT);
             UpdateHotkey(HOTKEY_ID_VIEWFINDER);
         }
 
-        private bool RegisterHotKey(int ID, int key, int modifiers)
+        private bool RegisterHotKey(int id, int key, int modifiers)
         {
             var helper = new WindowInteropHelper(this);
-            return RegisterHotKey(helper.Handle, ID, modifiers, key);
+            return RegisterHotKey(helper.Handle, id, modifiers, key);
         }
 
-        private bool UnregisterHotKey(int ID)
+        private bool UnregisterHotKey(int id)
         {
             var helper = new WindowInteropHelper(this);
-            return UnregisterHotKey(helper.Handle, ID);
+            return UnregisterHotKey(helper.Handle, id);
         }
 
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -323,8 +318,8 @@ namespace SuperScreenShotterVR
 
         private void Button_BrowseDirectory_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            var dialog = new FolderBrowserDialog();
+            DialogResult result = dialog.ShowDialog();
             if(result == System.Windows.Forms.DialogResult.OK)
             {
                 _settings.Directory = dialog.SelectedPath;
@@ -363,7 +358,7 @@ namespace SuperScreenShotterVR
             {
                 _controller.UpdateScreenshotHook();
             } else {
-                var result = System.Windows.MessageBox.Show("You need to restart this application to restore original screenshot functionality, do it now?", Properties.Resources.AppName, MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
+                var result = MessageBox.Show("You need to restart this application to restore original screenshot functionality, do it now?", Properties.Resources.AppName, MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
                 if(result == MessageBoxResult.Yes)
                 {
                     ExitApplication();
@@ -384,10 +379,10 @@ namespace SuperScreenShotterVR
             _settings.Save();
         }
 
-        private void ClickedURL(object sender, RoutedEventArgs e)
+        private void ClickedUrl(object sender, RoutedEventArgs e)
         {
             var link = (Hyperlink)sender;
-            Process.Start(link.NavigateUri.ToString());
+            MiscUtils.OpenUrl(link.NavigateUri.ToString());
         }
 
         private void TextBox_TimerSeconds_LostFocus(object sender, RoutedEventArgs e)
@@ -473,13 +468,13 @@ namespace SuperScreenShotterVR
         }
         private void Button_SetServerPort_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new InputDialog(this, "Set Server Port", "Server port", _settings.ServerPort.ToString());
+            var dialog = new SingleInputDialog(this, _settings.ServerPort.ToString(), "Server Port");
             var result = dialog.ShowDialog();
             if(result == true)
             {
-                if(Int32.TryParse(dialog.value, out int port))
+                if(Int32.TryParse(dialog.Value, out var port))
                 {
-                    TextBox_ServerPort.Text = dialog.value;
+                    TextBox_ServerPort.Text = dialog.Value;
                     if(_settings.ServerPort != port)
                     {
                         _settings.ServerPort = port;

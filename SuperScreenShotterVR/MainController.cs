@@ -1,4 +1,4 @@
-﻿using BOLL7708;
+﻿using EasyOpenVR;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,17 +6,22 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Valve.VR;
-using static BOLL7708.EasyOpenVRSingleton;
-using BOLL7708.EasyCSUtils;
-using Newtonsoft.Json;
+using static EasyOpenVR.EasyOpenVRSingleton;
+using System.Text.Json;
 using SuperScreenShotterVR.Remote;
+using EasyFramework;
+using EasyOpenVR.Data;
+using EasyOpenVR.Extensions;
+using EasyOpenVR.Utils;
 
 namespace SuperScreenShotterVR
 {
+    [SupportedOSPlatform("windows7.0")]
     public class MainController
     {
         private Properties.Settings _settings = Properties.Settings.Default;
@@ -67,27 +72,24 @@ namespace SuperScreenShotterVR
 
             if(_settings.EnableServer && _settings.ServerPort != 0)
             {
-                _server.StartOrRestart(_settings.ServerPort);
+                RestartServer(_settings.ServerPort);
             }
-            _server.MessageReceievedAction = (session, message) =>
+            _server.MessageReceivedAction = (session, message) =>
             {
                 var msg = new Remote.ScreenshotMessage();
                 try
                 {
-                    msg = JsonConvert.DeserializeObject<Remote.ScreenshotMessage>(message);
-                } catch(JsonReaderException e)
+                    msg = JsonSerializer.Deserialize<Remote.ScreenshotMessage>(message, JsonOptions.Get());
+                } catch(Exception e)
                 {
                     Debug.WriteLine(e.Message);
-                    _server.SendMessage(session, "Could not parse JSON");
+                    _ = _server.SendMessageToSingleOrAll(session, "Could not parse JSON");
                 }
-                if (_initComplete && !OpenVR.Overlay.IsDashboardVisible())
-                {
-                    if(msg.nonce != string.Empty)
-                    {
-                        msg.session = session;
-                        if (msg.delay > 0) TakeDelayedScreenshot(true, msg); else TakeScreenshot(true, msg); // byUser is true as this should show viewfinder etc.
-                    }
-                }
+
+                if (!_initComplete || OpenVR.Overlay.IsDashboardVisible()) return;
+                if (msg.Nonce == string.Empty) return;
+                msg.Session = session;
+                if (msg.Delay > 0) TakeDelayedScreenshot(true, msg); else TakeScreenshot(true, msg); // byUser is true as this should show viewfinder etc.
             };
             _server.StatusMessageAction = (session, connected, status) =>
             {
@@ -98,6 +100,16 @@ namespace SuperScreenShotterVR
             };
         }
 
+        private async void RestartServer(int port)
+        {
+            await _server.Start(port);
+        }
+
+        private async void StopServer()
+        {
+            await _server.Stop();
+        }
+        
         public void SetDebugLogAction(Action<string> action)
         {
             _ovr.SetDebugLogAction(action);
@@ -219,7 +231,7 @@ namespace SuperScreenShotterVR
                     }
                     else
                     { // Per frame loop
-                        _ovr.UpdateActionStates();
+                        _ovr.UpdateActionStates([0], 0);
                         _ovr.UpdateEvents();
 
                         if(_settings.CaptureTimer)
@@ -293,7 +305,7 @@ namespace SuperScreenShotterVR
 
         private ulong CreateOverlay(string imageFileName, string uniqueKey, string title) {
             // Instantiate overlay, width and transform is set in UpdateOverlays()
-            ulong handle = _ovr.CreateOverlay(uniqueKey, title, EasyOpenVRSingleton.Utils.GetEmptyTransform(), 1, _trackedDeviceIndex);
+            ulong handle = _ovr.CreateOverlay(uniqueKey, title, GeneralUtils.GetEmptyTransform(), 1, _trackedDeviceIndex);
 
             // Apply texture
             var path = $"{Directory.GetCurrentDirectory()}\\resources\\{imageFileName}.png";
@@ -319,7 +331,7 @@ namespace SuperScreenShotterVR
                 var YPR = new YPR(hmdTransform.EulerAngles());
 
                 // Static overlay
-                var overlayTransform = EasyOpenVRSingleton.Utils.GetEmptyTransform().Translate(new HmdVector3_t() { v2 = -distance });
+                var overlayTransform = GeneralUtils.GetEmptyTransform().Translate(new HmdVector3_t() { v2 = -distance });
 
                 // Roll indicator
                 var rollTransform = overlayTransform.RotateZ(-YPR.roll, false);
@@ -389,8 +401,8 @@ namespace SuperScreenShotterVR
 
         internal void UpdateServer()
         {
-            if (_settings.EnableServer) _server.StartOrRestart(_settings.ServerPort);
-            else _server.Stop();
+            if (_settings.EnableServer) RestartServer(_settings.ServerPort);
+            else StopServer();
         }
         
         public void UpdateScreenshotHook(bool force = false)
@@ -475,7 +487,7 @@ namespace SuperScreenShotterVR
                 _ovr.SubmitScreenshotToSteam(new ScreenshotResult()); // To make sure we don't have any hanging requests
                 var subfolder = byUser ? "" : _timerSubfolder;
                 UpdateOutputFolder(true, subfolder); // Output folder
-                var tag = _settings.AddTag ? (screenshotMessage?.tag ?? "") : "";
+                var tag = _settings.AddTag ? (screenshotMessage?.Tag ?? "") : "";
                 var success = _ovr.TakeScreenshot(out var result, "", tag); // Capture
                 var data = new ScreenshotData {result = result, byUser = byUser, screenshotMessage = screenshotMessage};
                 if (result != null)
@@ -503,9 +515,9 @@ namespace SuperScreenShotterVR
             {
                 ToggleViewfinder(true);
                 var delay = _settings.DelaySeconds;
-                if(screenshotMessage != null && screenshotMessage.delay > 0)
+                if(screenshotMessage != null && screenshotMessage.Delay > 0)
                 {
-                    delay = screenshotMessage.delay;
+                    delay = screenshotMessage.Delay;
                 }
                 Thread.Sleep(delay * 1000);
                 TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
@@ -555,27 +567,28 @@ namespace SuperScreenShotterVR
                         var imgb64data = GetBase64Bytes(bitmap);
                         if (msg != null)
                         {
-                            _server.SendMessage(
-                                msg.session,
-                                JsonConvert.SerializeObject(new ScreenshotResponse
+                            
+                            _ = _server.SendMessageToSingleOrAll(
+                                msg.Session,
+                                JsonSerializer.Serialize(new ScreenshotResponse
                                 {
-                                    nonce = msg.nonce,
-                                    image = imgb64data,
-                                    width = image.Width,
-                                    height = image.Height
-                                })
+                                    Nonce = msg.Nonce,
+                                    Image = imgb64data,
+                                    Width = image.Width,
+                                    Height = image.Height
+                                }, JsonOptions.Get())
                             );
                         }
                         else if(data.byUser)
                         {
-                            _server.SendMessageToAll(
-                                JsonConvert.SerializeObject(new ScreenshotResponse
+                            _ = _server.SendMessageToAll(
+                                JsonSerializer.Serialize(new ScreenshotResponse
                                 {
-                                    nonce = "",
-                                    image = imgb64data,
-                                    width = image.Width,
-                                    height = image.Height
-                                })
+                                    Nonce = "",
+                                    Image = imgb64data,
+                                    Width = image.Width,
+                                    Height = image.Height
+                                }, JsonOptions.Get())
                             );
                         }
                     }
@@ -614,7 +627,7 @@ namespace SuperScreenShotterVR
         }
 
         // https://stackoverflow.com/q/2419222
-        public static void SaveBitmapToPngFile(Bitmap bitmap, String filePath)
+        private static void SaveBitmapToPngFile(Bitmap bitmap, String filePath)
         {
             try
             {
@@ -629,59 +642,51 @@ namespace SuperScreenShotterVR
         }
 
         // https://stackoverflow.com/a/7939908
-        public static Bitmap GetRightEyeBitmap(Rectangle cropRect, String stereoImagePath)
+        private static Bitmap GetRightEyeBitmap(Rectangle cropRect, String stereoImagePath)
         {
             cropRect.X = cropRect.Width;
             Bitmap bitmap = Image.FromFile(stereoImagePath) as Bitmap;
             Bitmap newBitmap = new Bitmap(cropRect.Width, cropRect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            using (Graphics gfx = Graphics.FromImage(newBitmap))
-            {
-                gfx.DrawImage(bitmap, -cropRect.X, -cropRect.Y);
-                return newBitmap;
-            }
+            using Graphics gfx = Graphics.FromImage(newBitmap);
+            gfx.DrawImage(bitmap, -cropRect.X, -cropRect.Y);
+            return newBitmap;
         }
 
         // https://stackoverflow.com/a/38045852
-        public static Rectangle GetImageRectangle(String filePath)
+        private static Rectangle GetImageRectangle(String filePath)
         {
-            using (var imageStream = File.OpenRead(filePath))
-            {
-                var decoder = BitmapDecoder.Create(imageStream, BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.Default);
-                var width = decoder.Frames[0].PixelWidth;
-                var height = decoder.Frames[0].PixelHeight;
-                return new Rectangle(0, 0, width, height);
-            }
+            using var imageStream = File.OpenRead(filePath);
+            var decoder = BitmapDecoder.Create(imageStream, BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.Default);
+            var width = decoder.Frames[0].PixelWidth;
+            var height = decoder.Frames[0].PixelHeight;
+            return new Rectangle(0, 0, width, height);
         }
         
 
         // https://stackoverflow.com/a/24199315
-        public static Bitmap ResizeImage(Image image, int width, int height)
+        private static Bitmap ResizeImage(Image image, int width, int height)
         {
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
 
             destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            using (var graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            using var graphics = Graphics.FromImage(destImage);
+            graphics.CompositingMode = CompositingMode.SourceCopy;
+            graphics.CompositingQuality = CompositingQuality.HighQuality;
+            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            graphics.SmoothingMode = SmoothingMode.HighQuality;
+            graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                using (var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
-            }
+            using var wrapMode = new ImageAttributes();
+            wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+            graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
 
             return destImage;
         }
 
         // https://stackoverflow.com/a/6809677
-        public static void SetAlpha(ref Bitmap bmp, byte alpha)
+        private static void SetAlpha(ref Bitmap bmp, byte alpha)
         {
             if (bmp == null) throw new ArgumentNullException("bmp");
 
@@ -708,14 +713,12 @@ namespace SuperScreenShotterVR
         }
 
         // https://stackoverflow.com/a/41578098
-        public static string GetBase64Bytes(Bitmap bmp)
+        private static string GetBase64Bytes(Bitmap bmp)
         {
-            using (var ms = new MemoryStream())
-            {
-                bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                var b64 = Convert.ToBase64String(ms.GetBuffer());
-                return b64;
-            }
+            using var ms = new MemoryStream();
+            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            var b64 = Convert.ToBase64String(ms.GetBuffer());
+            return b64;
         }
     }
 }

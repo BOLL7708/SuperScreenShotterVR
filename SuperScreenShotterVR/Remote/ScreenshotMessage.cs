@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SuperSocket.WebSocket.Server;
 
 namespace SuperScreenShotterVR.Remote
 {
-    class ScreenshotMessage
+    internal class ScreenshotMessage
     {
-        public string nonce = "";
-        public int delay = 0;
-        public string tag = "";
-        public SuperSocket.WebSocket.WebSocketSession session = null;
+        public string Nonce = "";
+        public int Delay = 0;
+        public string Tag = "";
+        public WebSocketSession Session = null;
     }
 }
