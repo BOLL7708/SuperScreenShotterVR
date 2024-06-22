@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish SuperScreenShotterVR to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" delete_existing_files="true" platform="x64" produce_single_file="true" runtime="win-x64" target_folder="$PROJECT_DIR$/SuperScreenShotterVR/bin/Publish/net8.0-windows/publish" target_framework="net8.0-windows" uuid_high="8991562152711766106" uuid_low="-7853579338449025700" />
+    <method v="2" />
+  </configuration>
+</component>
