@@ -44,7 +44,7 @@ namespace SuperScreenShotterVR
 
         private uint _trackedDeviceIndex = 0;
         private OverlayTextureSize _reticleTextureSize = new OverlayTextureSize();
-        private float _displayFrequency = 90f;
+        private float _displayFrequency = 90f; // Used for how often we should move the overlay to react to the headset.
         private bool _overlayIsVisible = false;
         private float _screenshotFoV = 0;
 
