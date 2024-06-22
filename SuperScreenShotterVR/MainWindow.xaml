@@ -16,48 +16,48 @@
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <Label Content="OpenVR status:"/>
-                        <Label x:Name="Label_Status" Content="OpenVR Status" Background="Gray" Foreground="White"/>
+                        <Label x:Name="LabelStatus" Content="OpenVR Status" Background="Gray" Foreground="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
                         <Label Content="Current app ID:"/>
-                        <Label x:Name="Label_AppId" Content="Steam AppID" Background="Gray" Foreground="White"/>
+                        <Label x:Name="LabelAppId" Content="Steam AppID" Background="Gray" Foreground="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                        <TextBlock x:Name="textBlock_Help" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top">
-                            <Hyperlink NavigateUri="https://github.com/BOLL7708/SuperScreenShotterVR" Click="ClickedUrl">Help</Hyperlink>
+                        <TextBlock x:Name="TextBlockHelp" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top">
+                            <Hyperlink NavigateUri="https://github.com/BOLL7708/SuperScreenShotterVR" Click="ClickedUrl">Read Help</Hyperlink>
                         </TextBlock>
-                        <TextBlock x:Name="textBlock_Issue" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="10 0 10 0">
-                            <Hyperlink NavigateUri="https://github.com/BOLL7708/SuperScreenShotterVR/issues" Click="ClickedUrl">Report issue</Hyperlink>
+                        <TextBlock x:Name="TextBlockIssue" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="10 0 10 0">
+                            <Hyperlink NavigateUri="https://github.com/BOLL7708/SuperScreenShotterVR/issues" Click="ClickedUrl">Report Issue</Hyperlink>
                         </TextBlock>
-                        <TextBlock x:Name="textBlock_Twitter" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0 0 10 0">
-                            <Hyperlink NavigateUri="https://twitter.com/BOLL7708" Click="ClickedUrl">Contact</Hyperlink>
+                        <TextBlock x:Name="TextBlockCommunity" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0 0 10 0">
+                            <Hyperlink NavigateUri="https://discord.gg/Cdt4xjqV35" Click="ClickedUrl">Join Discord</Hyperlink>
                         </TextBlock>
-                        <Label x:Name="Label_Version" Content="version" Padding="0"/>
+                        <Label x:Name="LabelVersion" Content="version" Padding="0"/>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
             <GroupBox Header="System" DockPanel.Dock="Top" Background="AliceBlue" Margin="10 0 10 10">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="5">
-                        <CheckBox x:Name="CheckBox_LaunchMinimized" Content="Launch minimized " Checked="CheckBox_LaunchMinimized_Checked" Unchecked="CheckBox_LaunchMinimized_Checked"/>
-                        <CheckBox x:Name="CheckBox_Tray" Content="to tray, " Checked="CheckBox_Tray_Checked" Unchecked="CheckBox_Tray_Checked"/>
-                        <CheckBox x:Name="CheckBox_ExitWithSteamVR" Content="exit with SteamVR" Margin="5 0 5 0" Checked="CheckBox_ExitWithSteamVR_Checked" Unchecked="CheckBox_ExitWithSteamVR_Checked"/>
+                        <CheckBox x:Name="CheckBoxLaunchMinimized" Content="Launch minimized " Checked="CheckBox_LaunchMinimized_Checked" Unchecked="CheckBox_LaunchMinimized_Checked"/>
+                        <CheckBox x:Name="CheckBoxTray" Content="to tray, " Checked="CheckBox_Tray_Checked" Unchecked="CheckBox_Tray_Checked"/>
+                        <CheckBox x:Name="CheckBoxExitWithSteamVr" Content="exit with SteamVR" Margin="5 0 5 0" Checked="CheckBox_ExitWithSteamVR_Checked" Unchecked="CheckBox_ExitWithSteamVR_Checked"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox VerticalAlignment="Center" x:Name="CheckBox_ReplaceShortcut" Margin="5 6 5 5" Content="Replace SteamVR screenshot function" Checked="CheckBox_ReplaceShortcut_Checked" Unchecked="CheckBox_ReplaceShortcut_Checked"/>
-                        <Button x:Name="Button_RehookShortcut" Content="Replace again" Padding="4" Click="Button_RehookShortcut_Click"/>
+                        <CheckBox VerticalAlignment="Center" x:Name="CheckBoxReplaceShortcut" Margin="5 6 5 5" Content="Replace SteamVR screenshot function" Checked="CheckBox_ReplaceShortcut_Checked" Unchecked="CheckBox_ReplaceShortcut_Checked"/>
+                        <Button x:Name="ButtonRehookShortcut" Content="Replace again" Padding="4" Click="Button_RehookShortcut_Click"/>
                     </StackPanel>
 
-                    <CheckBox x:Name="CheckBox_EnableServer" Content="Enable remote control WebSocket server" Checked="CheckBox_EnableServer_Checked" Unchecked="CheckBox_EnableServer_Checked" Margin="5"/>
-                    <CheckBox x:Name="CheckBox_AddTag" Content="Add incoming tag to output filenames" Checked="CheckBox_AddTag_Checked" Unchecked="CheckBox_AddTag_Checked" Margin="15 0 5 5"/>
-                    <CheckBox x:Name="CheckBox_TransmitAll" Content="Respond with manual shots in addition to remote ones" Checked="CheckBox_TransmitAll_Checked" Unchecked="CheckBox_TransmitAll_Checked" Margin="15 0 5 5"/>
+                    <CheckBox x:Name="CheckBoxEnableServer" Content="Enable remote control WebSocket server" Checked="CheckBox_EnableServer_Checked" Unchecked="CheckBox_EnableServer_Checked" Margin="5"/>
+                    <CheckBox x:Name="CheckBoxAddTag" Content="Add incoming tag to output filenames" Checked="CheckBox_AddTag_Checked" Unchecked="CheckBox_AddTag_Checked" Margin="15 0 5 5"/>
+                    <CheckBox x:Name="CheckBoxTransmitAll" Content="Respond with manual shots in addition to remote ones" Checked="CheckBox_TransmitAll_Checked" Unchecked="CheckBox_TransmitAll_Checked" Margin="15 0 5 5"/>
 
                     <StackPanel Orientation="Horizontal" Margin="15 0 5 5">
                         <Label Content="Server port:"></Label>
-                        <TextBox x:Name="TextBox_ServerPort" IsEnabled="False" Text="0000" VerticalAlignment="Center" Padding="0 4" Margin="0 0 5 0"></TextBox>
-                        <Button x:Name="Button_SetServerPort" Content="Set port" Padding="4" Click="Button_SetServerPort_Click"></Button>
+                        <TextBox x:Name="TextBoxServerPort" IsEnabled="False" Text="0000" VerticalAlignment="Center" Padding="0 4" Margin="0 0 5 0"></TextBox>
+                        <Button x:Name="ButtonSetServerPort" Content="Set port" Padding="4" Click="Button_SetServerPort_Click"></Button>
                         <Label Content="Response resolution:"></Label>
-                        <ComboBox x:Name="ComboBox_ResponseResolution" SelectionChanged="ComboBox_ResponseResolution_SelectionChanged">
+                        <ComboBox x:Name="ComboBoxResponseResolution" SelectionChanged="ComboBox_ResponseResolution_SelectionChanged">
                             <ComboBoxItem>128px</ComboBoxItem>
                             <ComboBoxItem>256px</ComboBoxItem>
                             <ComboBoxItem>512px</ComboBoxItem>
@@ -71,21 +71,21 @@
             <GroupBox Header="Capture &amp; Output" DockPanel.Dock="Top" Background="Linen" Margin="10 0 10 10">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="5">
-                        <CheckBox x:Name="CheckBox_CaptureTimer" Content="Capture on a timer every: " Checked="CheckBox_CaptureTimer_Checked" Unchecked="CheckBox_CaptureTimer_Checked"/>
-                        <TextBox x:Name="TextBox_TimerSeconds" Text="0" LostFocus="TextBox_TimerSeconds_LostFocus"/>
+                        <CheckBox x:Name="CheckBoxCaptureTimer" Content="Capture on a timer every: " Checked="CheckBox_CaptureTimer_Checked" Unchecked="CheckBox_CaptureTimer_Checked"/>
+                        <TextBox x:Name="TextBoxTimerSeconds" Text="0" LostFocus="TextBox_TimerSeconds_LostFocus"/>
                         <Label Content=" seconds (no notification)" Padding="0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                        <CheckBox x:Name="CheckBox_DelayCapture" Content="Delay capture: " Checked="CheckBox_DelayCapture_Checked" Unchecked="CheckBox_DelayCapture_Checked"/>
-                        <TextBox x:Name="TextBox_DelaySeconds" Text="0" LostFocus="TextBox_Delay_LostFocus"/>
+                        <CheckBox x:Name="CheckBoxDelayCapture" Content="Delay capture: " Checked="CheckBox_DelayCapture_Checked" Unchecked="CheckBox_DelayCapture_Checked"/>
+                        <TextBox x:Name="TextBoxDelaySeconds" Text="0" LostFocus="TextBox_Delay_LostFocus"/>
                         <Label Content=" seconds (shows viewfinder if enabled)" Padding="0"/>
                     </StackPanel>
-                    <CheckBox x:Name="CheckBox_SubmitToSteam" Margin="5 0 5 5" Content="Submit screenshots to Steam screenshot library" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
-                    <CheckBox x:Name="CheckBox_SaveRightImage" Margin="5 0 5 5" Content="Also save an image for the right eye" Checked="CheckBox_SaveRightImage_Checked" Unchecked="CheckBox_SaveRightImage_Checked"/>
+                    <CheckBox x:Name="CheckBoxSubmitToSteam" Margin="5 0 5 5" Content="Submit screenshots to Steam screenshot library" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
+                    <CheckBox x:Name="CheckBoxSaveRightImage" Margin="5 0 5 5" Content="Also save an image for the right eye" Checked="CheckBox_SaveRightImage_Checked" Unchecked="CheckBox_SaveRightImage_Checked"/>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Output folder:"/>
-                        <Button x:Name="Button_BrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
-                        <Label x:Name="Label_Directory" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
+                        <Button x:Name="ButtonBrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
+                        <Label x:Name="LabelDirectory" Padding="4" BorderThickness="1" BorderBrush="#80808080"  Background="White" Content="C:\Bla bla bla"/>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
@@ -93,13 +93,13 @@
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <GroupBox Header="Hotkeys" Background="Ivory" Margin="10" DockPanel.Dock="Top">
                 <StackPanel Orientation="Vertical">
-                    <CheckBox x:Name="CheckBox_EnableHotkeys" Margin="5" Content="Enable keyboard hotkeys" Checked="CheckBox_EnableHotkeys_Checked" Unchecked="CheckBox_EnableHotkeys_Checked"/>
+                    <CheckBox x:Name="CheckBoxEnableHotkeys" Margin="5" Content="Enable keyboard hotkeys" Checked="CheckBox_EnableHotkeys_Checked" Unchecked="CheckBox_EnableHotkeys_Checked"/>
                     <StackPanel Orientation="Horizontal">
                         <Label>Take screenshot:</Label>
-                        <CheckBox x:Name="CheckBox_ScreenshotHotkeyAlt" Margin="6" Content="Alt" Checked="CheckBox_ScreenshotHotkeyAlt_Checked" Unchecked="CheckBox_ScreenshotHotkeyAlt_Checked"/>
-                        <CheckBox x:Name="CheckBox_ScreenshotHotkeyControl" Margin="6" Content="Control" Checked="CheckBox_ScreenshotHotkeyControl_Checked" Unchecked="CheckBox_ScreenshotHotkeyControl_Checked"/>
-                        <CheckBox x:Name="CheckBox_ScreenshotHotkeyShift" Margin="6" Content="Shift" Checked="CheckBox_ScreenshotHotkeyShift_Checked" Unchecked="CheckBox_ScreenshotHotkeyShift_Checked"/>
-                        <ComboBox x:Name="ComboBox_ScreenshotHotkey" SelectionChanged="ComboBox_ScreenshotHotkey_SelectionChanged">
+                        <CheckBox x:Name="CheckBoxScreenshotHotkeyAlt" Margin="6" Content="Alt" Checked="CheckBox_ScreenshotHotkeyAlt_Checked" Unchecked="CheckBox_ScreenshotHotkeyAlt_Checked"/>
+                        <CheckBox x:Name="CheckBoxScreenshotHotkeyControl" Margin="6" Content="Control" Checked="CheckBox_ScreenshotHotkeyControl_Checked" Unchecked="CheckBox_ScreenshotHotkeyControl_Checked"/>
+                        <CheckBox x:Name="CheckBoxScreenshotHotkeyShift" Margin="6" Content="Shift" Checked="CheckBox_ScreenshotHotkeyShift_Checked" Unchecked="CheckBox_ScreenshotHotkeyShift_Checked"/>
+                        <ComboBox x:Name="ComboBoxScreenshotHotkey" SelectionChanged="ComboBox_ScreenshotHotkey_SelectionChanged">
                             <ComboBoxItem>Disabled</ComboBoxItem>
                             <ComboBoxItem>F1</ComboBoxItem>
                             <ComboBoxItem>F2</ComboBoxItem>
@@ -120,10 +120,10 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>Show viewfinder:</Label>
-                        <CheckBox x:Name="CheckBox_ViewfinderHotkeyAlt" Margin="6" Content="Alt" Checked="CheckBox_ViewfinderHotkeyAlt_Checked" Unchecked="CheckBox_ViewfinderHotkeyAlt_Checked"/>
-                        <CheckBox x:Name="CheckBox_ViewfinderHotkeyControl" Margin="6" Content="Control" Checked="CheckBox_ViewfinderHotkeyControl_Checked" Unchecked="CheckBox_ViewfinderHotkeyControl_Checked"/>
-                        <CheckBox x:Name="CheckBox_ViewfinderHotkeyShift" Margin="6" Content="Shift" Checked="CheckBox_ViewfinderHotkeyShift_Checked" Unchecked="CheckBox_ViewfinderHotkeyShift_Checked"/>
-                        <ComboBox x:Name="ComboBox_ViewfinderHotkey" SelectionChanged="ComboBox_ViewfinderHotkey_SelectionChanged">
+                        <CheckBox x:Name="CheckBoxViewfinderHotkeyAlt" Margin="6" Content="Alt" Checked="CheckBox_ViewfinderHotkeyAlt_Checked" Unchecked="CheckBox_ViewfinderHotkeyAlt_Checked"/>
+                        <CheckBox x:Name="CheckBoxViewfinderHotkeyControl" Margin="6" Content="Control" Checked="CheckBox_ViewfinderHotkeyControl_Checked" Unchecked="CheckBox_ViewfinderHotkeyControl_Checked"/>
+                        <CheckBox x:Name="CheckBoxViewfinderHotkeyShift" Margin="6" Content="Shift" Checked="CheckBox_ViewfinderHotkeyShift_Checked" Unchecked="CheckBox_ViewfinderHotkeyShift_Checked"/>
+                        <ComboBox x:Name="ComboBoxViewfinderHotkey" SelectionChanged="ComboBox_ViewfinderHotkey_SelectionChanged">
                             <ComboBoxItem>Disabled</ComboBoxItem>
                             <ComboBoxItem>F1</ComboBoxItem>
                             <ComboBoxItem>F2</ComboBoxItem>
@@ -147,33 +147,33 @@
 
             <GroupBox Header="Notifications &amp; Audio" Background="MintCream" Margin="10 0 10 10" DockPanel.Dock="Top">
                 <StackPanel Orientation="Vertical">
-                    <CheckBox x:Name="CheckBox_Notifications" Margin="5" Content="Display notification on screenshot capture" Checked="CheckBox_Notifications_Checked" Unchecked="CheckBox_Notifications_Checked"/>
-                    <CheckBox x:Name="CheckBox_Thumbnail" Margin="5 0 5 5" Content="Display thumbnail in notification" Checked="CheckBox_Thumbnail_Checked" Unchecked="CheckBox_Thumbnail_Checked"/>
-                    <CheckBox x:Name="CheckBox_Audio" Margin="5 0 5 5" Content="Play sound effect on capture" Checked="CheckBox_Audio_Checked" Unchecked="CheckBox_Audio_Checked"/>
+                    <CheckBox x:Name="CheckBoxNotifications" Margin="5" Content="Display notification on screenshot capture" Checked="CheckBox_Notifications_Checked" Unchecked="CheckBox_Notifications_Checked"/>
+                    <CheckBox x:Name="CheckBoxThumbnail" Margin="5 0 5 5" Content="Display thumbnail in notification" Checked="CheckBox_Thumbnail_Checked" Unchecked="CheckBox_Thumbnail_Checked"/>
+                    <CheckBox x:Name="CheckBoxAudio" Margin="5 0 5 5" Content="Play sound effect on capture" Checked="CheckBox_Audio_Checked" Unchecked="CheckBox_Audio_Checked"/>
                 </StackPanel>
             </GroupBox>
 
             <GroupBox Header="Viewfinder" DockPanel.Dock="Top" Margin="10 0 10 10" Background="LavenderBlush">
                 <StackPanel Orientation="Vertical">
-                    <CheckBox x:Name="CheckBox_ViewFinder" Margin="5" Content="Enable viewfinder overlay in headset (binding)" Checked="CheckBox_ViewFinder_Checked" Unchecked="CheckBox_ViewFinder_Checked"/>
-                    <CheckBox x:Name="CheckBox_RestrictToBox" Margin="5" Content="Lock vertical indicator to indicator box" Checked="CheckBox_RestrictToBox_Checked" Unchecked="CheckBox_RestrictToBox_Checked"/>
-                    <CheckBox x:Name="CheckBox_LockHorizon" Margin="5" Content="Lock the angle of the vertical indicator to the horizon" Checked="CheckBox_LockHorizon_Checked" Unchecked="CheckBox_LockHorizon_Checked"/>
-                    <CheckBox x:Name="CheckBox_IndicateDegrees" Margin="5" Content="Indicate every 45 degrees" Checked="CheckBox_IndicateDegrees_Checked" Unchecked="CheckBox_IndicateDegrees_Checked"/>
+                    <CheckBox x:Name="CheckBoxViewFinder" Margin="5" Content="Enable viewfinder overlay in headset (binding)" Checked="CheckBox_ViewFinder_Checked" Unchecked="CheckBox_ViewFinder_Checked"/>
+                    <CheckBox x:Name="CheckBoxRestrictToBox" Margin="5" Content="Lock vertical indicator to indicator box" Checked="CheckBox_RestrictToBox_Checked" Unchecked="CheckBox_RestrictToBox_Checked"/>
+                    <CheckBox x:Name="CheckBoxLockHorizon" Margin="5" Content="Lock the angle of the vertical indicator to the horizon" Checked="CheckBox_LockHorizon_Checked" Unchecked="CheckBox_LockHorizon_Checked"/>
+                    <CheckBox x:Name="CheckBoxIndicateDegrees" Margin="5" Content="Indicate every 45 degrees" Checked="CheckBox_IndicateDegrees_Checked" Unchecked="CheckBox_IndicateDegrees_Checked"/>
                     
                     <DockPanel LastChildFill="True">
                         <Label Content="Distance: " Padding="5 5 0 5"/>
-                        <Label x:Name="Label_OverlayDistance" Content="100m" Padding="0 5 5 5" MinWidth="40"/>
-                        <Slider x:Name="Slider_OverlayDistance" Maximum="100" Minimum="17.1" ValueChanged="Slider_OverlayDistance_ValueChanged"/>
+                        <Label x:Name="LabelOverlayDistance" Content="100m" Padding="0 5 5 5" MinWidth="40"/>
+                        <Slider x:Name="SliderOverlayDistance" Maximum="100" Minimum="17.1" ValueChanged="Slider_OverlayDistance_ValueChanged"/>
                     </DockPanel>
                     <DockPanel LastChildFill="True">
                         <Label Content="Opacity: " Padding="5 5 0 5"/>
-                        <Label x:Name="Label_OverlayOpacity" Content="100%" Padding="0 5 5 5" MinWidth="40"/>
-                        <Slider x:Name="Slider_OverlayOpacity" Maximum="100" Minimum="1" ValueChanged="Slider_OverlayOpacity_ValueChanged"/>
+                        <Label x:Name="LabelOverlayOpacity" Content="100%" Padding="0 5 5 5" MinWidth="40"/>
+                        <Slider x:Name="SliderOverlayOpacity" Maximum="100" Minimum="1" ValueChanged="Slider_OverlayOpacity_ValueChanged"/>
                     </DockPanel>
                     <DockPanel LastChildFill="True">
                         <Label Content="Reticle size: " Padding="5 5 0 5"/>
-                        <Label x:Name="Label_ReticleSize" Content="25%" Padding="0 5 5 5" MinWidth="40"/>
-                        <Slider x:Name="Slider_ReticleSize" Maximum="100" Minimum="1" ValueChanged="Slider_ReticleSize_ValueChanged"/>
+                        <Label x:Name="LabelReticleSize" Content="25%" Padding="0 5 5 5" MinWidth="40"/>
+                        <Slider x:Name="SliderReticleSize" Maximum="100" Minimum="1" ValueChanged="Slider_ReticleSize_ValueChanged"/>
                     </DockPanel>
                 </StackPanel>
             </GroupBox>

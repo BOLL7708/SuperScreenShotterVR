@@ -65,8 +65,8 @@ namespace SuperScreenShotterVR
             {
                 Dispatcher.Invoke(() =>
                 {
-                    Label_Status.Content = status ? "Connected" : "Disconnected";
-                    Label_Status.Background = status ? Brushes.OliveDrab : Brushes.Tomato;
+                    LabelStatus.Content = status ? "Connected" : "Disconnected";
+                    LabelStatus.Background = status ? Brushes.OliveDrab : Brushes.Tomato;
                 });
             };
             _controller.AppUpdateAction = (appId) =>
@@ -74,8 +74,8 @@ namespace SuperScreenShotterVR
                 var appIdFixed = appId.Replace("_", "__"); // Single underscores are interpret to show the next char as shortcut
                 Dispatcher.Invoke(() =>
                 {
-                    Label_AppId.Content = appIdFixed != string.Empty ? appIdFixed : "None";
-                    Label_AppId.Background = appIdFixed != string.Empty ? Brushes.OliveDrab : Brushes.Gray;
+                    LabelAppId.Content = appIdFixed != string.Empty ? appIdFixed : "None";
+                    LabelAppId.Background = appIdFixed != string.Empty ? Brushes.OliveDrab : Brushes.Gray;
                 });
             };
             _controller.ExitAction = () =>
@@ -149,11 +149,11 @@ namespace SuperScreenShotterVR
         private void InitSettings()
         {
 #if DEBUG
-            Label_Version.Content = $"{Properties.Resources.Version}d";
+            LabelVersion.Content = $"{Properties.Resources.Version}d";
 #else
-            Label_Version.Content = Properties.Resources.Version;
+            LabelVersion.Content = Properties.Resources.Version;
 #endif
-            TextBox_TimerSeconds.IsEnabled = !_settings.CaptureTimer;
+            TextBoxTimerSeconds.IsEnabled = !_settings.CaptureTimer;
 
             if (_settings.Directory == string.Empty)
             {
@@ -167,47 +167,47 @@ namespace SuperScreenShotterVR
                 _settings.Save();
             }
 
-            CheckBox_ViewFinder.IsChecked = _settings.ViewFinder;
-            CheckBox_RestrictToBox.IsChecked = _settings.RestrictToBox;
-            CheckBox_LockHorizon.IsChecked = _settings.LockHorizon;
-            CheckBox_IndicateDegrees.IsChecked = _settings.IndicateDegrees;
-            CheckBox_SaveRightImage.IsChecked = _settings.SaveRightImage;
-            CheckBox_CaptureTimer.IsChecked = _settings.CaptureTimer;
-            TextBox_TimerSeconds.Text = _settings.TimerSeconds.ToString();
-            CheckBox_DelayCapture.IsChecked = _settings.DelayCapture;
-            TextBox_DelaySeconds.Text = _settings.DelaySeconds.ToString();
-            CheckBox_SubmitToSteam.IsChecked = _settings.SubmitToSteam;
-            Label_Directory.Content = _settings.Directory;
-            Label_Directory.ToolTip = _settings.Directory;
+            CheckBoxViewFinder.IsChecked = _settings.ViewFinder;
+            CheckBoxRestrictToBox.IsChecked = _settings.RestrictToBox;
+            CheckBoxLockHorizon.IsChecked = _settings.LockHorizon;
+            CheckBoxIndicateDegrees.IsChecked = _settings.IndicateDegrees;
+            CheckBoxSaveRightImage.IsChecked = _settings.SaveRightImage;
+            CheckBoxCaptureTimer.IsChecked = _settings.CaptureTimer;
+            TextBoxTimerSeconds.Text = _settings.TimerSeconds.ToString();
+            CheckBoxDelayCapture.IsChecked = _settings.DelayCapture;
+            TextBoxDelaySeconds.Text = _settings.DelaySeconds.ToString();
+            CheckBoxSubmitToSteam.IsChecked = _settings.SubmitToSteam;
+            LabelDirectory.Content = _settings.Directory;
+            LabelDirectory.ToolTip = _settings.Directory;
 
-            CheckBox_EnableHotkeys.IsChecked = _settings.HotkeysEnabled;
-            CheckBox_ScreenshotHotkeyAlt.IsChecked = _settings.HotkeyScreenshotAlt;
-            CheckBox_ScreenshotHotkeyControl.IsChecked = _settings.HotkeyScreenshotControl;
-            CheckBox_ScreenshotHotkeyShift.IsChecked = _settings.HotkeyScreenshotShift;
-            CheckBox_ViewfinderHotkeyAlt.IsChecked = _settings.HotkeyViewfinderAlt;
-            CheckBox_ViewfinderHotkeyControl.IsChecked = _settings.HotkeyViewfinderControl;
-            CheckBox_ViewfinderHotkeyShift.IsChecked = _settings.HotkeyViewfinderShift;
-            ComboBox_ScreenshotHotkey.SelectedIndex = _settings.HotkeyScreenshot;
-            ComboBox_ViewfinderHotkey.SelectedIndex = _settings.HotkeyViewfinder;
+            CheckBoxEnableHotkeys.IsChecked = _settings.HotkeysEnabled;
+            CheckBoxScreenshotHotkeyAlt.IsChecked = _settings.HotkeyScreenshotAlt;
+            CheckBoxScreenshotHotkeyControl.IsChecked = _settings.HotkeyScreenshotControl;
+            CheckBoxScreenshotHotkeyShift.IsChecked = _settings.HotkeyScreenshotShift;
+            CheckBoxViewfinderHotkeyAlt.IsChecked = _settings.HotkeyViewfinderAlt;
+            CheckBoxViewfinderHotkeyControl.IsChecked = _settings.HotkeyViewfinderControl;
+            CheckBoxViewfinderHotkeyShift.IsChecked = _settings.HotkeyViewfinderShift;
+            ComboBoxScreenshotHotkey.SelectedIndex = _settings.HotkeyScreenshot;
+            ComboBoxViewfinderHotkey.SelectedIndex = _settings.HotkeyViewfinder;
 
-            CheckBox_Notifications.IsChecked = _settings.Notifications;
-            CheckBox_Thumbnail.IsChecked = _settings.Thumbnail;
-            CheckBox_Audio.IsChecked = _settings.Audio;
+            CheckBoxNotifications.IsChecked = _settings.Notifications;
+            CheckBoxThumbnail.IsChecked = _settings.Thumbnail;
+            CheckBoxAudio.IsChecked = _settings.Audio;
 
-            CheckBox_ReplaceShortcut.IsChecked = _settings.ReplaceShortcut;
-            Button_RehookShortcut.IsEnabled = _settings.ReplaceShortcut;
-            CheckBox_LaunchMinimized.IsChecked = _settings.LaunchMinimized;
-            CheckBox_Tray.IsChecked = _settings.Tray;
-            CheckBox_ExitWithSteamVR.IsChecked = _settings.ExitWithSteamVR;
-            CheckBox_EnableServer.IsChecked = _settings.EnableServer;
-            CheckBox_AddTag.IsChecked = _settings.AddTag;
-            CheckBox_TransmitAll.IsChecked = _settings.TransmitAll;
-            TextBox_ServerPort.Text = _settings.ServerPort.ToString();
-            ComboBox_ResponseResolution.SelectedIndex = _settings.ResponseResolution;
+            CheckBoxReplaceShortcut.IsChecked = _settings.ReplaceShortcut;
+            ButtonRehookShortcut.IsEnabled = _settings.ReplaceShortcut;
+            CheckBoxLaunchMinimized.IsChecked = _settings.LaunchMinimized;
+            CheckBoxTray.IsChecked = _settings.Tray;
+            CheckBoxExitWithSteamVr.IsChecked = _settings.ExitWithSteamVR;
+            CheckBoxEnableServer.IsChecked = _settings.EnableServer;
+            CheckBoxAddTag.IsChecked = _settings.AddTag;
+            CheckBoxTransmitAll.IsChecked = _settings.TransmitAll;
+            TextBoxServerPort.Text = _settings.ServerPort.ToString();
+            ComboBoxResponseResolution.SelectedIndex = _settings.ResponseResolution;
 
-            Slider_OverlayDistance.Value = _settings.OverlayDistanceGui;
-            Slider_OverlayOpacity.Value = _settings.OverlayOpacity;
-            Slider_ReticleSize.Value = _settings.ReticleSize;
+            SliderOverlayDistance.Value = _settings.OverlayDistanceGui;
+            SliderOverlayOpacity.Value = _settings.OverlayOpacity;
+            SliderReticleSize.Value = _settings.ReticleSize;
             _settingsLoaded = true;
 
             Debug.WriteLine("Settings initiated");
@@ -301,7 +301,7 @@ namespace SuperScreenShotterVR
             var value = CheckboxValue(e);
             _settings.CaptureTimer = value;
             _settings.Save();
-            TextBox_TimerSeconds.IsEnabled = !value;
+            TextBoxTimerSeconds.IsEnabled = !value;
         }
         private void CheckBox_DelayCapture_Checked(object sender, RoutedEventArgs e)
         {
@@ -325,8 +325,8 @@ namespace SuperScreenShotterVR
                 _settings.Directory = dialog.SelectedPath;
                 _settings.Save();
                 _controller.UpdateOutputFolder();
-                Label_Directory.Content = _settings.Directory;
-                Label_Directory.ToolTip = _settings.Directory;
+                LabelDirectory.Content = _settings.Directory;
+                LabelDirectory.ToolTip = _settings.Directory;
             }
         }
 
@@ -353,7 +353,7 @@ namespace SuperScreenShotterVR
             var value = CheckboxValue(e);
             _settings.ReplaceShortcut = value;
             _settings.Save();
-            Button_RehookShortcut.IsEnabled = value;
+            ButtonRehookShortcut.IsEnabled = value;
             if (value)
             {
                 _controller.UpdateScreenshotHook();
@@ -387,19 +387,19 @@ namespace SuperScreenShotterVR
 
         private void TextBox_TimerSeconds_LostFocus(object sender, RoutedEventArgs e)
         {
-            int.TryParse(TextBox_TimerSeconds.Text, out int result);
+            int.TryParse(TextBoxTimerSeconds.Text, out int result);
             if (result < 0) result *= -1;
             _settings.TimerSeconds = result;
-            TextBox_TimerSeconds.Text = result.ToString();
+            TextBoxTimerSeconds.Text = result.ToString();
             _settings.Save();
         }
 
         private void TextBox_Delay_LostFocus(object sender, RoutedEventArgs e)
         {
-            int.TryParse(TextBox_DelaySeconds.Text, out int result);
+            int.TryParse(TextBoxDelaySeconds.Text, out int result);
             if (result < 0) result *= -1;
             _settings.DelaySeconds = result;
-            TextBox_DelaySeconds.Text = result.ToString();
+            TextBoxDelaySeconds.Text = result.ToString();
             _settings.Save();
         }
 
@@ -410,7 +410,7 @@ namespace SuperScreenShotterVR
             if (value < 2) valueStr = string.Format("{0:0.00}", value);
             else if (value < 10) valueStr = string.Format("{0:0.0}", value);
             else valueStr = string.Format("{0:0}", value);
-            Label_OverlayDistance.Content = $"{valueStr}m";
+            LabelOverlayDistance.Content = $"{valueStr}m";
             if(_settingsLoaded)
             {
                 _settings.OverlayDistanceGui = (float) e.NewValue;
@@ -421,7 +421,7 @@ namespace SuperScreenShotterVR
 
         private void Slider_OverlayOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Label_OverlayOpacity.Content = $"{Math.Round(e.NewValue)}%";
+            LabelOverlayOpacity.Content = $"{Math.Round(e.NewValue)}%";
             if(_settingsLoaded)
             {
                 _settings.OverlayOpacity = (float)e.NewValue;
@@ -431,7 +431,7 @@ namespace SuperScreenShotterVR
 
         private void Slider_ReticleSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Label_ReticleSize.Content = $"{Math.Round(e.NewValue)}%";
+            LabelReticleSize.Content = $"{Math.Round(e.NewValue)}%";
             if (_settingsLoaded)
             {
                 _settings.ReticleSize = (float)e.NewValue;
@@ -474,7 +474,7 @@ namespace SuperScreenShotterVR
             {
                 if(Int32.TryParse(dialog.Value, out var port))
                 {
-                    TextBox_ServerPort.Text = dialog.Value;
+                    TextBoxServerPort.Text = dialog.Value;
                     if(_settings.ServerPort != port)
                     {
                         _settings.ServerPort = port;
@@ -486,7 +486,7 @@ namespace SuperScreenShotterVR
         }
         private void ComboBox_ResponseResolution_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _settings.ResponseResolution = ComboBox_ResponseResolution.SelectedIndex;
+            _settings.ResponseResolution = ComboBoxResponseResolution.SelectedIndex;
             _settings.Save();
         }
 
@@ -527,7 +527,7 @@ namespace SuperScreenShotterVR
 
         private void ComboBox_ScreenshotHotkey_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _settings.HotkeyScreenshot = ComboBox_ScreenshotHotkey.SelectedIndex;
+            _settings.HotkeyScreenshot = ComboBoxScreenshotHotkey.SelectedIndex;
             _settings.Save();
             UpdateHotkey(HOTKEY_ID_SCREENSHOT);
         }
@@ -562,7 +562,7 @@ namespace SuperScreenShotterVR
 
         private void ComboBox_ViewfinderHotkey_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _settings.HotkeyViewfinder = ComboBox_ViewfinderHotkey.SelectedIndex;
+            _settings.HotkeyViewfinder = ComboBoxViewfinderHotkey.SelectedIndex;
             _settings.Save();
             UpdateHotkey(HOTKEY_ID_VIEWFINDER);
         }
