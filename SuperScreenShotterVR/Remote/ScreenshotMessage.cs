@@ -7,6 +7,6 @@ namespace SuperScreenShotterVR.Remote
         public string Nonce = "";
         public int Delay = 0;
         public string Tag = "";
-        public WebSocketSession Session = null;
+        internal WebSocketSession? Session = null;
     }
 }

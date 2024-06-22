@@ -83,7 +83,17 @@ namespace SuperScreenShotterVR
                 } catch(Exception e)
                 {
                     Debug.WriteLine(e.Message);
-                    _ = _server.SendMessageToSingleOrAll(session, "Could not parse JSON");
+                    _ = _server.SendMessageToSingleOrAll(
+                        session, 
+                        JsonSerializer.Serialize(
+                            ScreenshotResponse.Create(
+                                "", 
+                                message, 
+                                "Could not parse JSON"
+                            ),
+                            JsonOptions.Get()
+                        )
+                    );
                 }
 
                 if (!_initComplete || OpenVR.Overlay.IsDashboardVisible()) return;
@@ -570,25 +580,25 @@ namespace SuperScreenShotterVR
                             
                             _ = _server.SendMessageToSingleOrAll(
                                 msg.Session,
-                                JsonSerializer.Serialize(new ScreenshotResponse
-                                {
-                                    Nonce = msg.Nonce,
-                                    Image = imgb64data,
-                                    Width = image.Width,
-                                    Height = image.Height
-                                }, JsonOptions.Get())
+                                JsonSerializer.Serialize(ScreenshotResponse.Create(
+                                    msg.Nonce,
+                                    imgb64data,
+                                    image.Width,
+                                    image.Height
+                                ), 
+                                JsonOptions.Get())
                             );
                         }
                         else if(data.byUser)
                         {
                             _ = _server.SendMessageToAll(
-                                JsonSerializer.Serialize(new ScreenshotResponse
-                                {
-                                    Nonce = "",
-                                    Image = imgb64data,
-                                    Width = image.Width,
-                                    Height = image.Height
-                                }, JsonOptions.Get())
+                                JsonSerializer.Serialize(ScreenshotResponse.Create(
+                                        "",
+                                        imgb64data,
+                                        image.Width,
+                                        image.Height
+                                    ), 
+                                    JsonOptions.Get())
                             );
                         }
                     }
