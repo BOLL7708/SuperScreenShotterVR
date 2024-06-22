@@ -34,7 +34,7 @@ namespace SuperScreenShotterVR
         private Dictionary<uint, ScreenshotData> _screenshotQueue = new Dictionary<uint, ScreenshotData>();
         private uint _lastScreenshotHandle = 0;
         private bool _shouldShutDown = false;
-        private MediaPlayer _mediaPlayer;
+        private MediaPlayer? _mediaPlayer;
         private string _currentAudio = string.Empty;
         private Stopwatch _stopWatch = new Stopwatch();
 
@@ -97,9 +97,11 @@ namespace SuperScreenShotterVR
                 }
 
                 if (!_initComplete || OpenVR.Overlay.IsDashboardVisible()) return;
+                if (msg == null) return;
                 if (msg.Nonce == string.Empty) return;
                 msg.Session = session;
-                if (msg.Delay > 0) TakeDelayedScreenshot(true, msg); else TakeScreenshot(true, msg); // byUser is true as this should show viewfinder etc.
+                if (msg.Delay > 0) TakeDelayedScreenshot(true, msg);
+                else TakeScreenshot(true, msg); // byUser is true as this should show viewfinder etc.
             };
             _server.StatusMessageAction = (session, connected, status) =>
             {
@@ -338,24 +340,24 @@ namespace SuperScreenShotterVR
                 // Pose & orientation
                 var pose = poses[_trackedDeviceIndex];
                 var hmdTransform = pose.mDeviceToAbsoluteTracking;
-                var YPR = new YPR(hmdTransform.EulerAngles());
+                var ypr = new YPR(hmdTransform.EulerAngles());
 
                 // Static overlay
                 var overlayTransform = GeneralUtils.GetEmptyTransform().Translate(new HmdVector3_t() { v2 = -distance });
 
                 // Roll indicator
-                var rollTransform = overlayTransform.RotateZ(-YPR.roll, false);
+                var rollTransform = overlayTransform.RotateZ(-ypr.roll, false);
 
                 // Pitch indicator
                 var reticleSizeFactor = _settings.ReticleSize / 100;
                 var limitY = width * reticleSizeFactor / 2 / _reticleTextureSize.aspectRatio;
 
                 HmdMatrix34_t pitchTransform;
-                double pitchYDeg = YPR.pitch * 180.0 / Math.PI;
-                var pitchYIsNegative = YPR.pitch < 0;
-                double pitchYDegMod = (Math.Abs(pitchYDeg) +22.5) % 45 - 22.5;
+                var pitchYDeg = ypr.pitch * 180.0 / Math.PI;
+                var pitchYIsNegative = ypr.pitch < 0;
+                var pitchYDegMod = (Math.Abs(pitchYDeg) +22.5) % 45 - 22.5;
                 if (pitchYIsNegative) pitchYDegMod *= -1.0;
-                float pitchY = (float)(distance * Math.Tan(-(pitchYDegMod/180.0*Math.PI)));
+                var pitchY = (float)(distance * Math.Tan(-(pitchYDegMod/180.0*Math.PI)));
                 
                 if (_settings.RestrictToBox)
                 {
@@ -388,7 +390,7 @@ namespace SuperScreenShotterVR
                 if (_ovr.FindOverlay(PITCH_INDICATOR_OVERLAY_UNIQUE_KEY) != 0)
                 {
                     var pitchNearLimit = 7.0;
-                    var pitchNearDeg = Math.Abs(Math.Round(YPR.pitch * (180.0 * pitchNearLimit) / Math.PI)) % (45.0 * pitchNearLimit) == 0;
+                    var pitchNearDeg = Math.Abs(Math.Round(ypr.pitch * (180.0 * pitchNearLimit) / Math.PI)) % (45.0 * pitchNearLimit) == 0;
                     var pitchAlpha = (_settings.IndicateDegrees && !pitchNearDeg) ? alphaHalf : alpha;
                     _ovr.SetOverlayWidth(_pitchIndicatorOverlayHandle, width * reticleSizeFactor);
                     _ovr.SetOverlayTransform(_pitchIndicatorOverlayHandle, pitchTransform, _trackedDeviceIndex);
@@ -397,7 +399,7 @@ namespace SuperScreenShotterVR
                 if (_ovr.FindOverlay(ROLL_INDICATOR_OVERLAY_UNIQUE_KEY) != 0)
                 {
                     var rollNearLimit = 2.0;
-                    var rollNearDeg = Math.Abs(Math.Round(YPR.roll * (180.0 * rollNearLimit) / Math.PI)) % (45.0 * rollNearLimit) == 0;
+                    var rollNearDeg = Math.Abs(Math.Round(ypr.roll * (180.0 * rollNearLimit) / Math.PI)) % (45.0 * rollNearLimit) == 0;
                     var rollAlpha = (_settings.IndicateDegrees && !rollNearDeg) ? alphaHalf : alpha;
                     _ovr.SetOverlayWidth(_rollIndicatorOverlayHandle, width * reticleSizeFactor);
                     _ovr.SetOverlayTransform(_rollIndicatorOverlayHandle, rollTransform, _trackedDeviceIndex);
@@ -460,7 +462,7 @@ namespace SuperScreenShotterVR
 
         private void PlayScreenshotSound(bool onlyLoad = false)
         {
-            if(_mediaPlayer == null) _mediaPlayer = new MediaPlayer();
+            _mediaPlayer ??= new MediaPlayer();
             _mediaPlayer.Dispatcher.Invoke(() => // Always execute tasks on the media player on the thread it was initiated.
             {
                 if (_currentAudio != _settings.CustomAudio)
@@ -471,23 +473,22 @@ namespace SuperScreenShotterVR
                         _mediaPlayer.Open(new Uri(_currentAudio));
                     }
                 }
-                if (!onlyLoad)
-                {
-                    _mediaPlayer.Stop();
-                    _mediaPlayer.Play();
-                }
+
+                if (onlyLoad) return true;
+                _mediaPlayer.Stop();
+                _mediaPlayer.Play();
                 return true;
             });
         }
 
         private class ScreenshotData {
-            public ScreenshotResult result;
-            public bool byUser;
-            public ScreenshotMessage screenshotMessage;
+            public ScreenshotResult? Result;
+            public bool ByUser;
+            public ScreenshotMessage? ScreenshotMessage;
         }
 
         private string _timerSubfolder = "";
-        private uint TakeScreenshot(bool byUser = true, ScreenshotMessage screenshotMessage = null)
+        private uint TakeScreenshot(bool byUser = true, ScreenshotMessage? screenshotMessage = null)
         {
             uint resultHandle = 0;
             if (_currentAppId != string.Empty) // There needs to be a running application
@@ -499,7 +500,7 @@ namespace SuperScreenShotterVR
                 UpdateOutputFolder(true, subfolder); // Output folder
                 var tag = _settings.AddTag ? (screenshotMessage?.Tag ?? "") : "";
                 var success = _ovr.TakeScreenshot(out var result, "", tag); // Capture
-                var data = new ScreenshotData {result = result, byUser = byUser, screenshotMessage = screenshotMessage};
+                var data = new ScreenshotData {Result = result, ByUser = byUser, ScreenshotMessage = screenshotMessage};
                 if (result != null)
                 {
                     _screenshotQueue.Add(result.handle, data);
@@ -521,17 +522,16 @@ namespace SuperScreenShotterVR
 
         private void TakeDelayedScreenshot(bool shouldTrigger = true, ScreenshotMessage screenshotMessage = null)
         {
-            if(shouldTrigger)
+            if (!shouldTrigger) return;
+            
+            ToggleViewfinder(true);
+            var delay = _settings.DelaySeconds;
+            if(screenshotMessage != null && screenshotMessage.Delay > 0)
             {
-                ToggleViewfinder(true);
-                var delay = _settings.DelaySeconds;
-                if(screenshotMessage != null && screenshotMessage.Delay > 0)
-                {
-                    delay = screenshotMessage.Delay;
-                }
-                Thread.Sleep(delay * 1000);
-                TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
+                delay = screenshotMessage.Delay;
             }
+            Thread.Sleep(delay * 1000);
+            TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
         }
 
         private void ScreenShotTaken(VREvent_Data_t eventData)
@@ -541,15 +541,15 @@ namespace SuperScreenShotterVR
             if (_screenshotQueue.ContainsKey(handle))
             {
                 var data = _screenshotQueue[handle];
-                var result = data.result;
-                var filePath = $"{result.filePath}.png";
-                var filePathVR = $"{result.filePathVR}.png";
-                var filePathR = $"{result.filePath}_r.png";
+                var result = data.Result;
+                var filePath = $"{result?.filePath}.png";
+                var filePathVr = $"{result?.filePathVR}.png";
+                var filePathR = $"{result?.filePath}_r.png";
                 var rect = new Rectangle();
                 if (File.Exists(filePath))
                 {
                     rect = GetImageRectangle(filePath);
-                    if (_settings.SubmitToSteam && _currentAppId != string.Empty)
+                    if (_settings.SubmitToSteam && _currentAppId != string.Empty && result != null)
                     {
                         var submitted = _ovr.SubmitScreenshotToSteam(result);
                         Debug.WriteLine($"Managed to submit the screenshot to Steam: {submitted}");
@@ -559,18 +559,18 @@ namespace SuperScreenShotterVR
                         Debug.WriteLine("Will not submit the screenshot to Steam.");
                     }
 
-                    if(_settings.SaveRightImage && File.Exists(filePathVR))
+                    if(_settings.SaveRightImage && File.Exists(filePathVr))
                     {
-                        var bitmapR = GetRightEyeBitmap(rect, filePathVR);
+                        var bitmapR = GetRightEyeBitmap(rect, filePathVr);
                         SaveBitmapToPngFile(bitmapR, filePathR);
                     }
 
                     var image = Image.FromFile(filePath);
-                    var msg = data.screenshotMessage;
+                    var msg = data.ScreenshotMessage;
                     if (msg != null || _settings.TransmitAll)
                     {
                         var resIndex = _settings.ResponseResolution;
-                        var res = MainWindow.RES_MAP.Length > resIndex ? MainWindow.RES_MAP[resIndex] : 256;
+                        var res = MainWindow.ResMap.Length > resIndex ? MainWindow.ResMap[resIndex] : 256;
                         if (res < 0) res = image.Width;
                         var bitmap = ResizeImage(image, res, res);
                         SetAlpha(ref bitmap, 255);
@@ -589,7 +589,7 @@ namespace SuperScreenShotterVR
                                 JsonOptions.Get())
                             );
                         }
-                        else if(data.byUser)
+                        else if(data.ByUser)
                         {
                             _ = _server.SendMessageToAll(
                                 JsonSerializer.Serialize(ScreenshotResponse.Create(
@@ -619,7 +619,7 @@ namespace SuperScreenShotterVR
                     Debug.WriteLine($"Could not find screenshot after taking it: {filePath}");
                 }
 
-                if (_settings.Notifications && data.byUser)
+                if (_settings.Notifications && data.ByUser)
                 {
                     _ovr.EnqueueNotification(_notificationOverlayHandle, $"Screenshot taken!\n{rect.Width}x{rect.Height}px", notificationBitmap);
                 }

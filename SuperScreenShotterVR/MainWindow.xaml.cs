@@ -1,11 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -24,41 +22,34 @@ namespace SuperScreenShotterVR
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     [SupportedOSPlatform("windows7.0")]
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
-        private MainController _controller = new MainController();
-        private Settings _settings = Settings.Default;
-        private NotifyIcon _notifyIcon;
-        private static Mutex _mutex = null;
+        private readonly MainController _controller = new();
+        private readonly Settings _settings = Settings.Default;
         private bool _settingsLoaded = false;
         private bool _viewfinderOn = false;
 
         // For hotkey support
         [DllImport("user32.dll")]
-        public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
         [DllImport("user32.dll")]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-        private HwndSource _source;
-        private const int HOTKEY_ID_SCREENSHOT = 1111;
-        private const int HOTKEY_ID_VIEWFINDER = 2222;
+        private HwndSource? _source;
+        private const int HotkeyIdScreenshot = 1111;
+        private const int HotkeyIdViewfinder = 2222;
 
         public MainWindow()
         {
             InitializeComponent();
             
             // Prevent multiple instances running at once
-            _mutex = new Mutex(true, Properties.Resources.AppName, out bool createdNew);
-            if (!createdNew)
-            {
-                MessageBox.Show(
-                Application.Current.MainWindow,
-                "This application is already running!",
-                Properties.Resources.AppName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Information
-                );
-                Application.Current.Shutdown();
-            }
+            WindowUtils.CheckIfAlreadyRunning(Properties.Resources.AppName);
+            WindowUtils.CreateTrayIcon(
+                this, 
+                Properties.Resources.app_logo, 
+                Properties.Resources.AppName, 
+                Properties.Resources.Version
+            );
 
             InitSettings();
             _controller.StatusUpdateAction = (status) =>
@@ -95,28 +86,8 @@ namespace SuperScreenShotterVR
             });
             _controller.Init();
 
-            var icon = Properties.Resources.app_logo as Icon;
-            _notifyIcon = new NotifyIcon();
-            _notifyIcon.Click += NotifyIcon_Click;
-            _notifyIcon.Text = $"Click to show the {Properties.Resources.AppName} window";
-            _notifyIcon.Icon = icon;
-            _notifyIcon.Visible = true;
-
-            if(_settings.LaunchMinimized)
-            {
-                Hide();
-                WindowState = WindowState.Minimized;
-                ShowInTaskbar = !_settings.Tray;
-            }
-        }
-
-        // Restore window
-        private void NotifyIcon_Click(object sender, EventArgs e)
-        {
-            WindowState = WindowState.Normal;
-            ShowInTaskbar = true;
-            Show();
-            Activate();           
+            if (!_settings.LaunchMinimized) return;
+            WindowUtils.Minimize(this, !_settings.Tray);
         }
 
         // Not doing this will leave the icon after app closure
@@ -128,22 +99,18 @@ namespace SuperScreenShotterVR
                 _source.RemoveHook(HwndHook);
                 _source = null;
             }
-            var success1 = UnregisterHotKey(HOTKEY_ID_SCREENSHOT);
-            var success2 = UnregisterHotKey(HOTKEY_ID_VIEWFINDER);
+            var success1 = UnregisterHotKey(HotkeyIdScreenshot);
+            var success2 = UnregisterHotKey(HotkeyIdViewfinder);
             Debug.WriteLine($"Unregistering hotkeys: {success1}, {success2}");
 
-            _notifyIcon.Dispose();
+            WindowUtils.DestroyTrayIcon();
             base.OnClosing(e);
         }
 
         // Need to add this event to the window object
         private void Window_StateChanged(object sender, EventArgs e)
         {
-            switch (WindowState)
-            {
-                case WindowState.Minimized: ShowInTaskbar = !_settings.Tray; break;
-                default: ShowInTaskbar = true; Show(); break;
-            }
+            WindowUtils.OnStateChange(this, !_settings.Tray);
         }
 
         private void InitSettings()
@@ -214,7 +181,7 @@ namespace SuperScreenShotterVR
         }
 
         private void ExitApplication() {
-            if (_notifyIcon != null) _notifyIcon.Dispose();
+            WindowUtils.DestroyTrayIcon();
             Application.Current.Shutdown();
         }
 
@@ -224,8 +191,8 @@ namespace SuperScreenShotterVR
             var helper = new WindowInteropHelper(this);
             _source = HwndSource.FromHwnd(helper.Handle);
             _source?.AddHook(HwndHook);
-            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
-            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+            UpdateHotkey(HotkeyIdScreenshot);
+            UpdateHotkey(HotkeyIdViewfinder);
         }
 
         private bool RegisterHotKey(int id, int key, int modifiers)
@@ -242,19 +209,19 @@ namespace SuperScreenShotterVR
 
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            const int WM_HOTKEY = 0x0312;
+            const int wmHotkey = 0x0312;
             switch (msg)
             {
-                case WM_HOTKEY:
+                case wmHotkey:
                     Debug.WriteLine($"Reacting to hotkey {wParam.ToInt32()}!");
                     switch (wParam.ToInt32())
                     {
-                        case HOTKEY_ID_SCREENSHOT:
+                        case HotkeyIdScreenshot:
                             _controller.HotkeyScreenshot();
                             _viewfinderOn = false;
                             handled = true;
                             break;
-                        case HOTKEY_ID_VIEWFINDER:
+                        case HotkeyIdViewfinder:
                             _viewfinderOn = !_viewfinderOn;
                             _controller.HotkeyViewFinder(_viewfinderOn);
                             handled = true;
@@ -387,7 +354,7 @@ namespace SuperScreenShotterVR
 
         private void TextBox_TimerSeconds_LostFocus(object sender, RoutedEventArgs e)
         {
-            int.TryParse(TextBoxTimerSeconds.Text, out int result);
+            int.TryParse(TextBoxTimerSeconds.Text, out var result);
             if (result < 0) result *= -1;
             _settings.TimerSeconds = result;
             TextBoxTimerSeconds.Text = result.ToString();
@@ -396,7 +363,7 @@ namespace SuperScreenShotterVR
 
         private void TextBox_Delay_LostFocus(object sender, RoutedEventArgs e)
         {
-            int.TryParse(TextBoxDelaySeconds.Text, out int result);
+            int.TryParse(TextBoxDelaySeconds.Text, out var result);
             if (result < 0) result *= -1;
             _settings.DelaySeconds = result;
             TextBoxDelaySeconds.Text = result.ToString();
@@ -406,37 +373,36 @@ namespace SuperScreenShotterVR
         private void Slider_OverlayDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             var value = Math.Pow(e.NewValue, 3)/10000;
-            string valueStr;
-            if (value < 2) valueStr = string.Format("{0:0.00}", value);
-            else if (value < 10) valueStr = string.Format("{0:0.0}", value);
-            else valueStr = string.Format("{0:0}", value);
-            LabelOverlayDistance.Content = $"{valueStr}m";
-            if(_settingsLoaded)
+            var valueStr = value switch
             {
-                _settings.OverlayDistanceGui = (float) e.NewValue;
-                _settings.OverlayDistance = (float) value;
-                _settings.Save();
-            }
+                < 2 => $"{value:0.00}",
+                < 10 => $"{value:0.0}",
+                _ => $"{value:0}"
+            };
+            LabelOverlayDistance.Content = $"{valueStr}m";
+            
+            if (!_settingsLoaded) return;
+            _settings.OverlayDistanceGui = (float) e.NewValue;
+            _settings.OverlayDistance = (float) value;
+            _settings.Save();
         }
 
         private void Slider_OverlayOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             LabelOverlayOpacity.Content = $"{Math.Round(e.NewValue)}%";
-            if(_settingsLoaded)
-            {
-                _settings.OverlayOpacity = (float)e.NewValue;
-                _settings.Save();
-            }
+            
+            if (!_settingsLoaded) return;
+            _settings.OverlayOpacity = (float)e.NewValue;
+            _settings.Save();
         }
 
         private void Slider_ReticleSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             LabelReticleSize.Content = $"{Math.Round(e.NewValue)}%";
-            if (_settingsLoaded)
-            {
-                _settings.ReticleSize = (float)e.NewValue;
-                _settings.Save();
-            }
+            
+            if (!_settingsLoaded) return;
+            _settings.ReticleSize = (float)e.NewValue;
+            _settings.Save();
         }
 
         private void Button_RehookShortcut_Click(object sender, RoutedEventArgs e)
@@ -470,19 +436,15 @@ namespace SuperScreenShotterVR
         {
             var dialog = new SingleInputDialog(this, _settings.ServerPort.ToString(), "Server Port");
             var result = dialog.ShowDialog();
-            if(result == true)
-            {
-                if(Int32.TryParse(dialog.Value, out var port))
-                {
-                    TextBoxServerPort.Text = dialog.Value;
-                    if(_settings.ServerPort != port)
-                    {
-                        _settings.ServerPort = port;
-                        _settings.Save();
-                        _controller.UpdateServer();
-                    }
-                }
-            }
+            
+            if (result != true) return;
+            if (!Int32.TryParse(dialog.Value, out var port)) return;
+            TextBoxServerPort.Text = dialog.Value;
+            
+            if (_settings.ServerPort == port) return;
+            _settings.ServerPort = port;
+            _settings.Save();
+            _controller.UpdateServer();
         }
         private void ComboBox_ResponseResolution_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -500,38 +462,38 @@ namespace SuperScreenShotterVR
         {
             _settings.HotkeysEnabled = CheckboxValue(e);
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
-            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+            UpdateHotkey(HotkeyIdScreenshot);
+            UpdateHotkey(HotkeyIdViewfinder);
         }
 
         private void CheckBox_ScreenshotHotkeyAlt_Checked(object sender, RoutedEventArgs e)
         {
             _settings.HotkeyScreenshotAlt = CheckboxValue(e);
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+            UpdateHotkey(HotkeyIdScreenshot);
         }
 
         private void CheckBox_ScreenshotHotkeyControl_Checked(object sender, RoutedEventArgs e)
         {
             _settings.HotkeyScreenshotControl = CheckboxValue(e);
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+            UpdateHotkey(HotkeyIdScreenshot);
         }
 
         private void CheckBox_ScreenshotHotkeyShift_Checked(object sender, RoutedEventArgs e)
         {
             _settings.HotkeyScreenshotShift = CheckboxValue(e);
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+            UpdateHotkey(HotkeyIdScreenshot);
         }
 
         private void ComboBox_ScreenshotHotkey_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _settings.HotkeyScreenshot = ComboBoxScreenshotHotkey.SelectedIndex;
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_SCREENSHOT);
+            UpdateHotkey(HotkeyIdScreenshot);
         }
-        public static readonly int[] RES_MAP = {
+        public static readonly int[] ResMap = {
             128,
             256,
             512,
@@ -543,32 +505,32 @@ namespace SuperScreenShotterVR
         {
             _settings.HotkeyViewfinderAlt = CheckboxValue(e);
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+            UpdateHotkey(HotkeyIdViewfinder);
         }
 
         private void CheckBox_ViewfinderHotkeyControl_Checked(object sender, RoutedEventArgs e)
         {
             _settings.HotkeyViewfinderControl = CheckboxValue(e);
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+            UpdateHotkey(HotkeyIdViewfinder);
         }
         
         private void CheckBox_ViewfinderHotkeyShift_Checked(object sender, RoutedEventArgs e)
         {
             _settings.HotkeyViewfinderShift = CheckboxValue(e);
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+            UpdateHotkey(HotkeyIdViewfinder);
         }
 
         private void ComboBox_ViewfinderHotkey_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _settings.HotkeyViewfinder = ComboBoxViewfinderHotkey.SelectedIndex;
             _settings.Save();
-            UpdateHotkey(HOTKEY_ID_VIEWFINDER);
+            UpdateHotkey(HotkeyIdViewfinder);
         }
 
         // HotKeys https://stackoverflow.com/a/11378213/2076423
-        private readonly int[] KEY_MAP = { // https://stackoverflow.com/a/1153059
+        private readonly int[] _keyMap = { // https://stackoverflow.com/a/1153059
             0,
             KeyInterop.VirtualKeyFromKey(Key.F1),
             KeyInterop.VirtualKeyFromKey(Key.F2),
@@ -587,34 +549,36 @@ namespace SuperScreenShotterVR
             KeyInterop.VirtualKeyFromKey(Key.F15)
         };
 
-        private void UpdateHotkey(int ID) {
+        private void UpdateHotkey(int id) {
             if (!_settingsLoaded) return;
-            var unregistered = UnregisterHotKey(ID);
-            Debug.WriteLine($"Unregistered key: {ID} ({unregistered})");
+            var unregistered = UnregisterHotKey(id);
+            Debug.WriteLine($"Unregistered key: {id} ({unregistered})");
             var keyIndex = 0;
             var modifiers = 0;
-            switch (ID) {
-                case HOTKEY_ID_SCREENSHOT:
+            switch (id) {
+                case HotkeyIdScreenshot:
                     keyIndex = _settings.HotkeyScreenshot;
                     modifiers = GetModifiers(_settings.HotkeyScreenshotAlt, _settings.HotkeyScreenshotControl, _settings.HotkeyScreenshotShift);
                     break;
-                case HOTKEY_ID_VIEWFINDER:
+                case HotkeyIdViewfinder:
                     keyIndex = _settings.HotkeyViewfinder;
                     modifiers = GetModifiers(_settings.HotkeyViewfinderAlt, _settings.HotkeyViewfinderControl, _settings.HotkeyViewfinderShift);
                     break;
             }
 
-            int key = KEY_MAP[keyIndex];
+            var key = _keyMap[keyIndex];
             if (_settings.HotkeysEnabled && key != 0)
             {
-                var registered = RegisterHotKey(ID, key, modifiers);
-                Debug.WriteLine($"  Registered key: {ID} ({registered}), {key}, {modifiers}");
+                var registered = RegisterHotKey(id, key, modifiers);
+                Debug.WriteLine($"  Registered key: {id} ({registered}), {key}, {modifiers}");
                 if(!registered) MessageBox.Show($"Could not register this global hotkey ({key}+{modifiers}), some other application might already be using it.");
             }
 
+            return;
+
             int GetModifiers(bool alt, bool control, bool shift) {
                 // https://stackoverflow.com/a/32179433/2076423
-                int mod = 0;
+                var mod = 0;
                 if (alt) mod |= 1;
                 if (control) mod |= 2;
                 if (shift) mod |= 4;
