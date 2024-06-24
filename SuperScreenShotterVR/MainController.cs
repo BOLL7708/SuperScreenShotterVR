@@ -451,13 +451,12 @@ namespace SuperScreenShotterVR
 
         private void ShutdownIfWeShould()
         {
-            if(_shouldShutDown)
-            {
-                _shouldShutDown = false;
-                _ovr.Shutdown();
-                _initComplete = false;
-                ExitAction.Invoke();
-            }
+            if (!_shouldShutDown) return;
+            
+            _shouldShutDown = false;
+            _ovr.Shutdown();
+            _initComplete = false;
+            ExitAction.Invoke();
         }
 
         private void PlayScreenshotSound(bool onlyLoad = false)
