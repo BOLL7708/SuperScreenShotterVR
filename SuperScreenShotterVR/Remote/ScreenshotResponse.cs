@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SuperScreenShotterVR.Remote
+﻿namespace SuperScreenShotterVR.Remote
 {
     class ScreenshotResponse
     {
@@ -12,17 +6,19 @@ namespace SuperScreenShotterVR.Remote
         public string Image = "";
         public int Width = 0;
         public int Height = 0;
+        public string FilePath = "";
         public string Message = "";
         public string Error = "";
         
-        public static ScreenshotResponse Create(string nonce, string image, int width, int height)
+        public static ScreenshotResponse Create(string nonce, string image, int width, int height, string filePath)
         {
             return new ScreenshotResponse()
             {
                 Nonce = nonce,
                 Image = image,
                 Width = width,
-                Height = height
+                Height = height,
+                FilePath = filePath
             };
         }
         

@@ -583,7 +583,8 @@ namespace SuperScreenShotterVR
                                     msg.Nonce,
                                     imgb64data,
                                     image.Width,
-                                    image.Height
+                                    image.Height,
+                                    filePath
                                 ), 
                                 JsonOptions.Get())
                             );
@@ -595,7 +596,8 @@ namespace SuperScreenShotterVR
                                         "",
                                         imgb64data,
                                         image.Width,
-                                        image.Height
+                                        image.Height,
+                                        filePath
                                     ), 
                                     JsonOptions.Get())
                             );
