@@ -571,9 +571,13 @@ namespace SuperScreenShotterVR
                         var resIndex = _settings.ResponseResolution;
                         var res = MainWindow.ResMap.Length > resIndex ? MainWindow.ResMap[resIndex] : 256;
                         if (res < 0) res = image.Width;
-                        var bitmap = ResizeImage(image, res, res);
-                        SetAlpha(ref bitmap, 255);
-                        var imgb64data = GetBase64Bytes(bitmap);
+                        var imgb64data = "";
+                        if (res != 0)
+                        {
+                            var bitmap = ResizeImage(image, res, res);
+                            SetAlpha(ref bitmap, 255);
+                            imgb64data = GetBase64Bytes(bitmap);
+                        }
                         if (msg != null)
                         {
                             
@@ -584,7 +588,8 @@ namespace SuperScreenShotterVR
                                     imgb64data,
                                     image.Width,
                                     image.Height,
-                                    filePath
+                                    filePath,
+                                    filePathVr
                                 ), 
                                 JsonOptions.Get())
                             );
@@ -597,7 +602,8 @@ namespace SuperScreenShotterVR
                                         imgb64data,
                                         image.Width,
                                         image.Height,
-                                        filePath
+                                        filePath,
+                                        filePathVr
                                     ), 
                                     JsonOptions.Get())
                             );

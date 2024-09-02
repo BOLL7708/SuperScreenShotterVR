@@ -493,13 +493,15 @@ namespace SuperScreenShotterVR
             _settings.Save();
             UpdateHotkey(HotkeyIdScreenshot);
         }
-        public static readonly int[] ResMap = {
+        public static readonly int[] ResMap =
+        [
             128,
             256,
             512,
             1024,
-            -1
-        };
+            -1,
+            0
+        ];
 
         private void CheckBox_ViewfinderHotkeyAlt_Checked(object sender, RoutedEventArgs e)
         {

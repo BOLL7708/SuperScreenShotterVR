@@ -7,10 +7,11 @@
         public int Width = 0;
         public int Height = 0;
         public string FilePath = "";
+        public string FilePathVR = "";
         public string Message = "";
         public string Error = "";
         
-        public static ScreenshotResponse Create(string nonce, string image, int width, int height, string filePath)
+        public static ScreenshotResponse Create(string nonce, string image, int width, int height, string filePath, string filePathVR)
         {
             return new ScreenshotResponse()
             {
@@ -18,7 +19,8 @@
                 Image = image,
                 Width = width,
                 Height = height,
-                FilePath = filePath
+                FilePath = filePath,
+                FilePathVR = filePathVR
             };
         }
         
