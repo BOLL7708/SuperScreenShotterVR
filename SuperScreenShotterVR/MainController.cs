@@ -527,8 +527,12 @@ namespace SuperScreenShotterVR
             {
                 delay = screenshotMessage.Delay;
             }
-            Thread.Sleep(delay * 1000);
-            TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
+
+            System.Threading.Tasks.Task.Run(async () =>
+            {
+                Thread.Sleep(delay * 1000);
+                TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
+            });
         }
 
         private void ScreenShotTaken(VREvent_Data_t eventData)
