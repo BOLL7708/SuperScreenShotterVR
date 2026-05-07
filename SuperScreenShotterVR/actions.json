@@ -5,6 +5,10 @@
 			"binding_url": "bindings_knuckles.json"
 		},
 		{
+			"controller_type": "oculus_touch",
+			"binding_url": "bindings_oculus_touch.json"
+		},
+		{
 			"controller_type": "gamepad",
 			"binding_url": "bindings_gamepad.json"
 		}
