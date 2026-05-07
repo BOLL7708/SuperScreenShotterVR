@@ -59,7 +59,7 @@
     "category": "steamvr_input",
     "controller_type": "oculus_touch",
     "description": "Default Oculus Touch Bindings",
-    "name": "Default SuperScreenShotterVR configuration for Index Controller",
+    "name": "Default SuperScreenShotterVR configuration for Oculus Touch",
     "options": {},
     "simulated_actions": []
 }
