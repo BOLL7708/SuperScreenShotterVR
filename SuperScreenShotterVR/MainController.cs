@@ -520,7 +520,8 @@ namespace SuperScreenShotterVR
         private void TakeDelayedScreenshot(bool shouldTrigger = true, ScreenshotMessage screenshotMessage = null)
         {
             if (!shouldTrigger) return;
-            
+            if (_currentAppId.Equals(string.Empty)) return; // There needs to be a running application
+
             ToggleViewfinder(true);
             var delay = _settings.DelaySeconds;
             if(screenshotMessage != null && screenshotMessage.Delay > 0)
