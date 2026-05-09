@@ -440,14 +440,14 @@ namespace SuperScreenShotterVR
 
                 if (_settings.OutputAppname && _currentAppName != string.Empty)
                 {
-                    Debug.WriteLine($"Settings subfolder to: steam.app.{_currentAppName}");
+                    Debug.WriteLine($"Settings subfolder to: {_currentAppName}");
                     dir = $"{dir}\\steam.app.{_currentAppName}";
                     if (subfolder != string.Empty) dir = $"{dir}\\{subfolder}";
                     if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 }
                 else if (_currentAppId != string.Empty)
                 {
-                    Debug.WriteLine($"Settings subfolder to: {_currentAppId}");
+                    Debug.WriteLine($"Settings subfolder to: steam.app.{_currentAppId}");
                     dir = $"{dir}\\{_currentAppId}";
                     if (subfolder != string.Empty) dir = $"{dir}\\{subfolder}";
                     if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
