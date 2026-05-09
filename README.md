@@ -1,3 +1,6 @@
+# DEPRECATED
+This project has been archived with the intent of transferring the features to [BVRTK](https://github.com/BOLL7708/BVRTK) which will then act as direct replacement.
+
 # SuperScreenShotterVR
 Extends SteamVR screenshot functionality, download the latest release [here](https://github.com/BOLL7708/SuperScreenShotterVR/releases).
 
