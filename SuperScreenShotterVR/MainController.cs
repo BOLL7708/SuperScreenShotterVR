@@ -6,9 +6,9 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Media;
 using System.Runtime.Versioning;
 using System.Threading;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Valve.VR;
 using static EasyOpenVR.EasyOpenVRSingleton;
@@ -34,7 +34,7 @@ namespace SuperScreenShotterVR
         private Dictionary<uint, ScreenshotData> _screenshotQueue = new Dictionary<uint, ScreenshotData>();
         private uint _lastScreenshotHandle = 0;
         private bool _shouldShutDown = false;
-        private MediaPlayer? _mediaPlayer;
+        private SoundPlayer? _mediaPlayer;
         private string _currentAudio = string.Empty;
         private Stopwatch _stopWatch = new Stopwatch();
 
@@ -51,7 +51,7 @@ namespace SuperScreenShotterVR
         private OverlayTextureSize _reticleTextureSize = new OverlayTextureSize();
         private float _displayFrequency = 90f; // Used for how often we should move the overlay to react to the headset.
         private bool _overlayIsVisible = false;
-        private float _screenshotFoV = 0;
+        private float _screenshotFoV = 100;
 
         private SuperServer _server = new SuperServer();
 
@@ -65,7 +65,7 @@ namespace SuperScreenShotterVR
             StatusUpdateAction.Invoke(false);
             AppUpdateAction.Invoke("");
 
-            _mediaPlayer = new MediaPlayer();
+            _mediaPlayer = new SoundPlayer();
 
             _workerThread = new Thread(WorkerThread);
             _workerThread.Start();
@@ -288,8 +288,10 @@ namespace SuperScreenShotterVR
         private void UpdateTrackedDeviceIndex()
         {
             var indexes = _ovr.GetIndexesForTrackedDeviceClass(ETrackedDeviceClass.HMD);
+            float fov = _ovr.GetFloatTrackedDeviceProperty(_trackedDeviceIndex, ETrackedDeviceProperty.Prop_ScreenshotHorizontalFieldOfViewDegrees_Float);
+
             if (indexes.Length > 0) _trackedDeviceIndex = indexes[0];
-            _screenshotFoV = _ovr.GetFloatTrackedDeviceProperty(_trackedDeviceIndex, ETrackedDeviceProperty.Prop_ScreenshotHorizontalFieldOfViewDegrees_Float);
+            if (fov > 0) _screenshotFoV = fov;
         }
 
         private void ToggleViewfinder(bool visible)
@@ -461,23 +463,19 @@ namespace SuperScreenShotterVR
 
         private void PlayScreenshotSound(bool onlyLoad = false)
         {
-            _mediaPlayer ??= new MediaPlayer();
-            _mediaPlayer.Dispatcher.Invoke(() => // Always execute tasks on the media player on the thread it was initiated.
+            _mediaPlayer ??= new SoundPlayer();
+            if (_currentAudio != _settings.CustomAudio)
             {
-                if (_currentAudio != _settings.CustomAudio)
+                _currentAudio = _settings.CustomAudio;
+                if (_currentAudio != string.Empty && File.Exists(_currentAudio))
                 {
-                    _currentAudio = _settings.CustomAudio;
-                    if (_currentAudio != string.Empty && File.Exists(_currentAudio))
-                    {
-                        _mediaPlayer.Open(new Uri(_currentAudio));
-                    }
+                    _mediaPlayer.SoundLocation = _currentAudio;
                 }
+            }
 
-                if (onlyLoad) return true;
-                _mediaPlayer.Stop();
-                _mediaPlayer.Play();
-                return true;
-            });
+            if (onlyLoad) return;
+            _mediaPlayer.Stop();
+            _mediaPlayer.Play();
         }
 
         private class ScreenshotData {
@@ -522,15 +520,20 @@ namespace SuperScreenShotterVR
         private void TakeDelayedScreenshot(bool shouldTrigger = true, ScreenshotMessage screenshotMessage = null)
         {
             if (!shouldTrigger) return;
-            
+            if (_currentAppId.Equals(string.Empty)) return; // There needs to be a running application
+
             ToggleViewfinder(true);
             var delay = _settings.DelaySeconds;
             if(screenshotMessage != null && screenshotMessage.Delay > 0)
             {
                 delay = screenshotMessage.Delay;
             }
-            Thread.Sleep(delay * 1000);
-            TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
+
+            System.Threading.Tasks.Task.Run(async () =>
+            {
+                Thread.Sleep(delay * 1000);
+                TakeScreenshot(true, screenshotMessage); // byUser set to true as time-lapse does not use delayed shots
+            });
         }
 
         private void ScreenShotTaken(VREvent_Data_t eventData)
