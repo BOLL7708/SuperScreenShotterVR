@@ -237,6 +237,19 @@ namespace SuperScreenShotterVR.Properties {
                 this["SaveRightImage"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OutputAppname
+        {
+            get {
+                return ((bool)(this["OutputAppname"]));
+            }
+            set {
+                this["OutputAppname"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

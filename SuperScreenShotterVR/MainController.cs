@@ -30,6 +30,7 @@ namespace SuperScreenShotterVR
         private bool _initComplete = false;
         private bool _isHookedForScreenshots = false;
         private string _currentAppId = "";
+        private string _currentAppName = "";
         private ulong _notificationOverlayHandle = 0;
         private Dictionary<uint, ScreenshotData> _screenshotQueue = new Dictionary<uint, ScreenshotData>();
         private uint _lastScreenshotHandle = 0;
@@ -149,6 +150,7 @@ namespace SuperScreenShotterVR
                         UpdateScreenshotHook();
                         PlayScreenshotSound(true);
                         _currentAppId = _ovr.GetRunningApplicationId();
+                        _currentAppName = _ovr.GetApplicationPropertyString(_currentAppId, EVRApplicationProperty.Name_String);
                         AppUpdateAction.Invoke(_currentAppId);
                         // ToggleViewfinder(true); // DEBUG
                         UpdateTrackedDeviceIndex();
@@ -185,6 +187,7 @@ namespace SuperScreenShotterVR
                         
                         _notificationOverlayHandle = _ovr.InitNotificationOverlay("SuperScreenShotterVR");
                         _currentAppId = _ovr.GetRunningApplicationId();
+                        _currentAppName = _ovr.GetApplicationPropertyString(_currentAppId, EVRApplicationProperty.Name_String);
 
                         // Events
                         _ovr.RegisterEvent(EVREventType.VREvent_RequestScreenshot, (data) => { 
@@ -434,13 +437,22 @@ namespace SuperScreenShotterVR
             {
                 var dir = _settings.Directory;
                 if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                if(_currentAppId != string.Empty)
+
+                if (_settings.OutputAppname && _currentAppName != string.Empty)
+                {
+                    Debug.WriteLine($"Settings subfolder to: steam.app.{_currentAppName}");
+                    dir = $"{dir}\\steam.app.{_currentAppName}";
+                    if (subfolder != string.Empty) dir = $"{dir}\\{subfolder}";
+                    if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                }
+                else if (_currentAppId != string.Empty)
                 {
                     Debug.WriteLine($"Settings subfolder to: {_currentAppId}");
                     dir = $"{dir}\\{_currentAppId}";
                     if (subfolder != string.Empty) dir = $"{dir}\\{subfolder}";
                     if (createDirIfNeeded && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                } else
+                }
+                else
                 {
                     if (subfolder != string.Empty) dir = $"{dir}\\{subfolder}";
                 }

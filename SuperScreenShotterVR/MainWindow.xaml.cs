@@ -139,6 +139,7 @@ namespace SuperScreenShotterVR
             CheckBoxLockHorizon.IsChecked = _settings.LockHorizon;
             CheckBoxIndicateDegrees.IsChecked = _settings.IndicateDegrees;
             CheckBoxSaveRightImage.IsChecked = _settings.SaveRightImage;
+            CheckBoxOutputAppname.IsChecked = _settings.OutputAppname;
             CheckBoxCaptureTimer.IsChecked = _settings.CaptureTimer;
             TextBoxTimerSeconds.Text = _settings.TimerSeconds.ToString();
             CheckBoxDelayCapture.IsChecked = _settings.DelayCapture;
@@ -464,6 +465,12 @@ namespace SuperScreenShotterVR
             _settings.Save();
             UpdateHotkey(HotkeyIdScreenshot);
             UpdateHotkey(HotkeyIdViewfinder);
+        }
+
+        private void CheckBox_OutputAppname_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.OutputAppname = CheckboxValue(e);
+            _settings.Save();
         }
 
         private void CheckBox_ScreenshotHotkeyAlt_Checked(object sender, RoutedEventArgs e)

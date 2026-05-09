@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SuperScreenShotterVR"
         mc:Ignorable="d"
-        Title="SuperScreenShotterVR" Height="500" Width="840" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
+        Title="SuperScreenShotterVR" Height="520" Width="840" Icon="resources/logo.ico" StateChanged="Window_StateChanged">
     <Grid Grid.Row="2">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -83,6 +83,7 @@
                     </StackPanel>
                     <CheckBox x:Name="CheckBoxSubmitToSteam" Margin="5 0 5 5" Content="Submit screenshots to Steam screenshot library" Checked="CheckBox_SubmitToSteam_Checked" Unchecked="CheckBox_SubmitToSteam_Checked"/>
                     <CheckBox x:Name="CheckBoxSaveRightImage" Margin="5 0 5 5" Content="Also save an image for the right eye" Checked="CheckBox_SaveRightImage_Checked" Unchecked="CheckBox_SaveRightImage_Checked"/>
+                    <CheckBox x:Name="CheckBoxOutputAppname" Margin="5 0 5 5" Content="Using application name instaed of appid for output folder" Checked="CheckBox_OutputAppname_Checked" Unchecked="CheckBox_OutputAppname_Checked"/>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Output folder:"/>
                         <Button x:Name="ButtonBrowseDirectory" Padding="4" Content="Browse..." Click="Button_BrowseDirectory_Click"/>
